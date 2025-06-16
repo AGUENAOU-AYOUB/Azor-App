@@ -55,5 +55,20 @@ ignored by Git and will be recreated whenever needed.
 2. Set the necessary environment variables. You can copy `.env.example` to `.env` or configure them in your hosting platform.
 3. Start the server with Gunicorn:
    ```bash
-   gunicorn run_webapp:app -b 0.0.0.0:8000
-   ```
+    gunicorn run_webapp:app -b 0.0.0.0:8000
+    ```
+
+## Running Tests
+
+To run the automated tests you'll need the packages listed in
+`requirements.txt` **and** the `pytest` framework:
+
+```bash
+pip install -r requirements.txt pytest
+```
+
+Then execute the tests with:
+
+```bash
+python -m pytest
+```
