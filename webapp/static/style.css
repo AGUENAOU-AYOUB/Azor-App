@@ -79,3 +79,34 @@ body {
 .spinner-border.text-primary {
     color: var(--primary-color);
 }
+
+/* Icon styles */
+.d-none {
+    display: none !important;
+}
+.input-group-text i {
+    color: var(--secondary-color);
+    transition: color 0.2s ease;
+}
+
+.input-group:focus-within .input-group-text i {
+    color: var(--accent-color);
+}
+
+#togglePass {
+    color: var(--secondary-color);
+    transition: color 0.2s ease;
+}
+
+#togglePass.active,
+#togglePass:hover {
+    color: var(--accent-color);
+}
+
+.btn-brand i {
+    transition: transform 0.2s ease;
+}
+
+.btn-brand:hover i {
+    transform: translateX(0.25rem);
+}
