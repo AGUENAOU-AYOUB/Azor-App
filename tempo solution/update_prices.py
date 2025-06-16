@@ -9,7 +9,13 @@ update_prices.py  –  one-shot Shopify variant price updater
  • Rounds:  …xx.00  if decimal < 0.5   else  …xx.90
 """
 
-import os, sys, json, math, time, textwrap, requests
+import os
+import sys
+import json
+import math
+import time
+import textwrap
+import requests
 from dotenv import load_dotenv
 
 # ─────────── ENV / CONFIG ───────────
@@ -38,8 +44,10 @@ def get(endpoint, params=None):
     while True:
         r = requests.get(url, headers=HEADERS, params=params)
         if r.status_code == 429:
-            time.sleep(2); continue
-        r.raise_for_status(); return r
+            time.sleep(2)
+            continue
+        r.raise_for_status()
+        return r
 
 
 def put(endpoint, payload):
@@ -47,8 +55,10 @@ def put(endpoint, payload):
     while True:
         r = requests.put(url, headers=HEADERS, json=payload)
         if r.status_code == 429:
-            time.sleep(2); continue
-        r.raise_for_status(); return r
+            time.sleep(2)
+            continue
+        r.raise_for_status()
+        return r
 
 
 def paginate_products():
@@ -64,7 +74,8 @@ def paginate_products():
         for part in link.split(","):
             if 'rel="next"' in part:
                 nxt = part.split(";")[0].split("page_info=")[1].strip("<> ")
-        if not nxt: break
+        if not nxt:
+            break
         page = nxt
 
 
@@ -95,11 +106,13 @@ def main():
 
         cat = "bracelets" if "bracelet" in tags else ("colliers" if "collier" in tags else None)
         if not cat:
-            print(f"• Skip {prod['title']} (no bracelet/collier tag)"); continue
+            print(f"• Skip {prod['title']} (no bracelet/collier tag)")
+            continue
 
         bp = base_price(prod["id"])
         if bp is None:
-            print(f"• Skip {prod['title']} (missing base_price)"); continue
+            print(f"• Skip {prod['title']} (missing base_price)")
+            continue
 
         print(f"\n→  {prod['title']}  [{cat}]  base={bp}")
         for v in prod["variants"]:

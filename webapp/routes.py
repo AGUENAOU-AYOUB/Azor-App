@@ -1,5 +1,16 @@
-from flask import Blueprint, render_template, request, session, redirect, url_for, Response, flash
-import subprocess, os, json
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    session,
+    redirect,
+    url_for,
+    Response,
+    flash,
+)
+import subprocess
+import os
+import json
 
 main_bp = Blueprint('main', __name__)
 
