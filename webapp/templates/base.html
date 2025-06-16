@@ -4,78 +4,23 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
     <title>Azor Price Updater</title>
     <style>
-        body {
-
-            background: linear-gradient(135deg, #6a11cb, #a34ef2);
-
-            color: #212529;
-            font-family: 'Poppins', sans-serif;
-        }
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'DM Serif Display', serif;
-            color: #2c044d;
-        }
-        .navbar {
-
-            background: #fff;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .navbar-nav {
-            gap: 0.5rem;
-        }
-        .navbar-brand {
-            font-weight: 500;
-        }
-
-        .nav-link {
-            color: #212529 !important;
-        }
-        .navbar-text {
-            color: #212529 !important;
-        }
-        .nav-link.active {
-            color: #6a11cb !important;
-            font-weight: 600;
-        }
-        .btn-brand {
-            background: linear-gradient(45deg, #6a11cb, #2575fc);
-            color: #fff;
-            border: none;
-        }
-        .btn-brand:hover { filter: brightness(1.1); }
+        body { background-color: #f8f9fa; }
+        .navbar { background-color: #343a40; }
+        .navbar-brand, .nav-link, .navbar-text { color: #fff !important; }
+        .nav-link.active { font-weight: bold; }
+        .btn-brand { background-color: #008cba; color: #fff; }
         h3, h5 { margin-top: 1rem; }
-        .card {
-            background-color: #ffffff;
-            border: 1px solid rgba(0,0,0,0.1);
-        }
-        .text-primary {
-            color: #00eaff !important;
-        }
-        .bg-primary {
-            background-color: #008dff !important;
-        }
-        .btn-secondary {
-            background-color: #ff8c42;
-            border: none;
-            color: #fff;
-        }
-        .btn-secondary:hover { filter: brightness(1.05); }
     </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg">
   <div class="container-fluid">
     <a class="navbar-brand" href="/">Azor Updater</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse justify-content-between" id="mainNav">
+    <div class="collapse navbar-collapse">
       {% if session.get('user') %}
-      <ul class="navbar-nav align-items-lg-center mb-2 mb-lg-0">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
           <a class="nav-link {{ 'active' if request.path == url_for('main.home') else '' }}" href="{{ url_for('main.home') }}">Home</a>
         </li>
@@ -86,7 +31,7 @@
           <a class="nav-link {{ 'active' if request.path == url_for('main.variant_updater') else '' }}" href="{{ url_for('main.variant_updater') }}">Variant</a>
         </li>
       </ul>
-      <ul class="navbar-nav ms-lg-auto align-items-lg-center">
+      <ul class="navbar-nav ms-auto">
         <li class="nav-item"><span class="navbar-text me-3">Logged in as {{ session['user'] }}</span></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a></li>
       </ul>
@@ -95,25 +40,16 @@
   </div>
 </nav>
 <div class="container py-4">
+    {% with messages = get_flashed_messages(with_categories=True) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="alert alert-{{ 'danger' if category == 'error' else category }}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
     {% block content %}{% endblock %}
 </div>
-
-<div class="toast-container position-fixed top-0 end-0 p-3">
-    {% with messages = get_flashed_messages(with_categories=True) %}
-      {% for category, msg in messages %}
-        <div class="toast align-items-center text-bg-{{ 'danger' if category == 'error' else category }} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="d-flex">
-            <div class="toast-body">{{ msg }}</div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-        </div>
-      {% endfor %}
-    {% endwith %}
-</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  document.querySelectorAll('.toast').forEach(t => new bootstrap.Toast(t).show());
-</script>
 {% block scripts %}{% endblock %}
 </body>
 </html>
