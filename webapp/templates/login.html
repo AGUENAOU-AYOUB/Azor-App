@@ -1,19 +1,39 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-4">
-    <h3 class="mb-3">Login</h3>
-    <form method="post">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <div class="mb-3">
-        <input class="form-control" type="text" name="username" placeholder="Username" required>
-      </div>
-      <div class="mb-3">
-        <input class="form-control" type="password" name="password" placeholder="Password" required>
-      </div>
-      {% if error %}<div class="text-danger mb-2">{{ error }}</div>{% endif %}
-      <button class="btn btn-brand" type="submit">Login</button>
-    </form>
+<div class="row justify-content-center py-5">
+  <div class="col-sm-8 col-md-5 col-lg-4">
+    <div class="card shadow-sm p-4">
+      <h3 class="text-center mb-4">Login</h3>
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="mb-3">
+          <input class="form-control" type="text" name="username" placeholder="Username" required>
+        </div>
+        <div class="mb-3 input-group">
+          <input class="form-control" type="password" id="password" name="password" placeholder="Password" required>
+          <button class="btn btn-outline-secondary" type="button" id="togglePass"><span class="visually-hidden">Toggle password</span><i class="bi bi-eye"></i></button>
+        </div>
+        {% if error %}<div class="text-danger mb-2">{{ error }}</div>{% endif %}
+        <div class="d-grid">
+          <button class="btn btn-brand" type="submit">Login</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+  const toggle = document.getElementById('togglePass');
+  if(toggle){
+    toggle.addEventListener('click', () => {
+      const pass = document.getElementById('password');
+      const icon = toggle.querySelector('i');
+      const show = pass.type === 'password';
+      pass.type = show ? 'text' : 'password';
+      icon.classList.toggle('bi-eye', !show);
+      icon.classList.toggle('bi-eye-slash', show);
+    });
+  }
+</script>
 {% endblock %}
