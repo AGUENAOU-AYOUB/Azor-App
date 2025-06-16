@@ -2,16 +2,16 @@
 {% block content %}
 <div class="row justify-content-center py-5">
   <div class="col-sm-8 col-md-5 col-lg-4">
-    <div class="card shadow-sm p-4">
+    <div class="card shadow-sm p-4 text-light">
       <h3 class="text-center mb-4">Login</h3>
       <form method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="mb-3">
-          <input class="form-control" type="text" name="username" placeholder="Username" required>
+          <input class="form-control bg-dark text-light" type="text" name="username" placeholder="Username" required>
         </div>
         <div class="mb-3 input-group">
-          <input class="form-control" type="password" id="password" name="password" placeholder="Password" required>
-          <button class="btn btn-outline-secondary" type="button" id="togglePass"><span class="visually-hidden">Toggle password</span><i class="bi bi-eye"></i></button>
+          <input class="form-control bg-dark text-light" type="password" id="password" name="password" placeholder="Password" required>
+          <button class="btn btn-outline-light" type="button" id="togglePass"><span class="visually-hidden">Toggle password</span><i class="bi bi-eye"></i></button>
         </div>
         {% if error %}<div class="text-danger mb-2">{{ error }}</div>{% endif %}
         <div class="d-grid">

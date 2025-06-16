@@ -9,48 +9,50 @@
     <title>Azor Price Updater</title>
     <style>
         :root {
-            --primary-gradient: linear-gradient(90deg,#6a11cb,#a044ff);
-            --cyan: #1cc8ff;
-            --electric: #1779ff;
-            --orange: #ff9f43;
+            --bg-gradient: linear-gradient(135deg,#0d1117,#1c2331);
+            --brand-gradient: linear-gradient(90deg,#d4af37,#b76e79);
+            --gold: #d4af37;
+            --silver: #cccccc;
         }
         body {
-            background-color: #f8f9fa;
-            color: #333;
+            background: var(--bg-gradient);
+            color: #f8f9fa;
             font-family: 'Inter', sans-serif;
         }
         h1, h2, h3, h4, h5, h6 {
             font-family: 'Playfair Display', serif;
-            color: #2d2d2d;
+            color: var(--gold);
         }
         .navbar {
-            background-image: var(--primary-gradient);
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(4px);
         }
         .navbar-brand {
-            color: #fff !important;
+            color: var(--gold) !important;
             letter-spacing: 1px;
         }
         .nav-link {
-            color: #fff !important;
+            color: #f8f9fa !important;
             margin-right: 1rem;
         }
         .nav-link.active {
-            color: var(--orange) !important;
+            color: var(--gold) !important;
             font-weight: 500;
         }
         .btn-brand {
-            background-image: var(--primary-gradient);
-            color: #fff;
+            background-image: var(--brand-gradient);
+            color: #000;
             border: none;
         }
         .btn-brand:hover { opacity: 0.9; }
         h3, h5 { margin-top: 1rem; }
         .card {
-            background-color: #fff;
-            border: none;
-            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+            background-color: #1f222d;
+            border: 1px solid #2a2d3c;
+            color: #f8f9fa;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.3);
         }
-        .card-title i { color: var(--electric); }
+        .card-title i { color: var(--silver); }
     </style>
 </head>
 <body>
