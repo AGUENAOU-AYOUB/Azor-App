@@ -80,24 +80,17 @@ body {
     color: var(--primary-color);
 }
 
-/* Simple inline SVG icons */
-.icon {
-    width: 1em;
-    height: 1em;
-    fill: currentColor;
-    vertical-align: -0.125em;
-}
-
+/* Icon styles */
 .d-none {
     display: none !important;
 }
-
-.input-group-text .icon {
+.input-group-text i {
     color: var(--secondary-color);
     transition: color 0.2s ease;
 }
 
-.input-group:focus-within .input-group-text .icon {
+
+.input-group:focus-within .input-group-text i {
     color: var(--accent-color);
 }
 
@@ -110,11 +103,11 @@ body {
 #togglePass:hover {
     color: var(--accent-color);
 }
-
-.btn-brand svg {
+\
+.btn-brand i {
     transition: transform 0.2s ease;
 }
 
-.btn-brand:hover svg {
+.btn-brand:hover i {
     transform: translateX(0.25rem);
 }
