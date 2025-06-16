@@ -2,7 +2,9 @@
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-md-4">
-    <h3 class="mb-3 text-center">Login</h3>
+
+    <h3 class="mb-3 text-center"><i class="fa-solid fa-circle-user me-1"></i>Login</h3>
+
     <form method="post">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="mb-3 input-group">
@@ -15,7 +17,9 @@
         <button class="btn btn-outline-secondary" type="button" id="togglePass"><i class="fa-solid fa-eye"></i></button>
       </div>
       {% if error %}<div class="text-danger mb-2">{{ error }}</div>{% endif %}
-      <button class="btn btn-brand w-100" type="submit">Login</button>
+
+      <button class="btn btn-brand w-100" type="submit"><i class="fa-solid fa-right-to-bracket me-1"></i>Login</button>
+
     </form>
   </div>
 </div>
