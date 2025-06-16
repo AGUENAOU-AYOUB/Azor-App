@@ -17,7 +17,8 @@ main_bp = Blueprint('main', __name__)
 
 SCRIPTS = {
     'percentage': os.path.join('scripts', 'update_prices_shopify.py'),
-    'variant': os.path.join('tempo solution', 'update_prices.py')
+    'variant': os.path.join('tempo solution', 'update_prices.py'),
+    'reset': os.path.join('scripts', 'reset_prices_shopify.py')
 }
 
 
@@ -89,4 +90,11 @@ def stream_percentage():
 @login_required
 def stream_variant():
     cmd = ['python3', SCRIPTS['variant']]
+    return Response(stream_job(cmd), mimetype='text/event-stream')
+
+
+@main_bp.route('/stream/reset')
+@login_required
+def stream_reset():
+    cmd = ['python3', SCRIPTS['reset']]
     return Response(stream_job(cmd), mimetype='text/event-stream')
