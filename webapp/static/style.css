@@ -1,23 +1,23 @@
 :root {
-    --primary-color: #B8860B;
-    --secondary-color-1: #8B4513;
-    --secondary-color-2: #A0522D;
-    --accent-color: #3B2F2F;
-    --bg-start: #F5F5DC;
-    --bg-end: #FFF8DC;
-    --text-color: #2F2F2F;
+    --primary-color: #4B343B;
+    --secondary-color: #6C5158;
+    --accent-color: #D4A3A6;
+    --highlight-color: #EDE5E5;
+    --neutral-dark: #333333;
+    --neutral-light: #F7F7F7;
 }
 
 body {
-    font-family: 'Poppins', 'Inter', sans-serif;
-    background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
-    color: var(--text-color);
+    font-family: 'Montserrat', 'Poppins', sans-serif;
+    background: linear-gradient(135deg, var(--neutral-light), var(--highlight-color));
+    color: var(--neutral-dark);
     min-height: 100vh;
 }
 
 .navbar {
     background: #ffffff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--highlight-color);
 }
 
 .navbar-brand img {
@@ -25,7 +25,11 @@ body {
 }
 
 .nav-link {
-    color: var(--accent-color) !important;
+    color: var(--primary-color) !important;
+}
+
+.nav-link:hover {
+    color: var(--secondary-color) !important;
 }
 
 .nav-link.active {
@@ -39,6 +43,12 @@ body {
     transition: opacity 0.2s ease;
 }
 
+.btn-secondary {
+    background: var(--secondary-color);
+    border: none;
+    color: #fff;
+}
+
 .btn-brand:hover {
     opacity: 0.85;
 }
@@ -47,6 +57,7 @@ body {
     border: none;
     border-radius: 0.5rem;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    background: var(--highlight-color);
 }
 
 .service-card {
@@ -59,7 +70,7 @@ body {
 }
 
 #log {
-    background: #ffffff;
+    background: var(--highlight-color);
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 0.25rem;
     padding: 0.75rem;
