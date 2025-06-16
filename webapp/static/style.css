@@ -23,13 +23,6 @@ body {
 
 .navbar-brand .logo-img {
     height: 40px;
-    margin-right: 0.5rem;
-}
-
-.navbar-brand .logo-text {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--primary-color);
 }
 
 .nav-link {
