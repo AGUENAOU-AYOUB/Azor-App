@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ g.lang }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -19,28 +19,33 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
-      {% if session.get('user') %}
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        {% if session.get('user') %}
         <li class="nav-item">
-          <a class="nav-link {{ 'active' if request.path == url_for('main.home') else '' }}" href="{{ url_for('main.home') }}">Home</a>
+          <a class="nav-link {{ 'active' if request.path == url_for('main.home') else '' }}" href="{{ url_for('main.home') }}">{{ t('home') }}</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link {{ 'active' if request.path == url_for('main.percentage_updater') else '' }}" href="{{ url_for('main.percentage_updater') }}">Percentage</a>
+          <a class="nav-link {{ 'active' if request.path == url_for('main.percentage_updater') else '' }}" href="{{ url_for('main.percentage_updater') }}">{{ t('percentage') }}</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link {{ 'active' if request.path == url_for('main.variant_updater') else '' }}" href="{{ url_for('main.variant_updater') }}">Variant</a>
+          <a class="nav-link {{ 'active' if request.path == url_for('main.variant_updater') else '' }}" href="{{ url_for('main.variant_updater') }}">{{ t('variant') }}</a>
         </li>
+        {% endif %}
       </ul>
       <ul class="navbar-nav ms-auto">
+        {% if session.get('user') %}
         <li class="nav-item d-flex align-items-center me-3">
           <i class="fa-solid fa-user me-1"></i>
           <span class="navbar-text">{{ session['user'] }}</span>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('auth.logout') }}"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a>
+          <a class="nav-link" href="{{ url_for('auth.logout') }}"><i class="fa-solid fa-right-from-bracket me-1"></i>{{ t('logout') }}</a>
+        </li>
+        {% endif %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('main.toggle_language') }}">{{ t('language') }}</a>
         </li>
       </ul>
-      {% endif %}
     </div>
   </div>
 </nav>
