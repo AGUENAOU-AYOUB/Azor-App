@@ -79,3 +79,15 @@ body {
 .spinner-border.text-primary {
     color: var(--primary-color);
 }
+
+/* Simple inline SVG icons */
+.icon {
+    width: 1em;
+    height: 1em;
+    fill: currentColor;
+    vertical-align: -0.125em;
+}
+
+.d-none {
+    display: none !important;
+}
