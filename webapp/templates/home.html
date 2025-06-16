@@ -1,9 +1,33 @@
 {% extends 'base.html' %}
 {% block content %}
-<h3>Welcome</h3>
-<p>Select an action:</p>
-<ul>
-  <li><a href="{{ url_for('main.percentage_updater') }}">Percentage Updater</a></li>
-  <li><a href="{{ url_for('main.variant_updater') }}">Variant Updater</a></li>
-</ul>
+<h3 class="mb-4">Welcome</h3>
+<div class="row g-4">
+  <div class="col-md-4">
+    <a href="{{ url_for('main.percentage_updater') }}" class="text-decoration-none text-reset">
+      <div class="card service-card h-100 text-center p-4">
+        <i class="fa-solid fa-percent fa-2x mb-3"></i>
+        <h5 class="card-title">Percentage Price Updater</h5>
+        <p class="card-text small">Adjust all product prices by a percentage.</p>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="{{ url_for('main.variant_updater') }}" class="text-decoration-none text-reset">
+      <div class="card service-card h-100 text-center p-4">
+        <i class="fa-solid fa-gears fa-2x mb-3"></i>
+        <h5 class="card-title">Variant Price Updater</h5>
+        <p class="card-text small">Update variant surcharges individually.</p>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="{{ url_for('main.reset_prices') }}" class="text-decoration-none text-reset">
+      <div class="card service-card h-100 text-center p-4">
+        <i class="fa-solid fa-rotate-left fa-2x mb-3"></i>
+        <h5 class="card-title">Price Reset</h5>
+        <p class="card-text small">Restore prices from the last backup.</p>
+      </div>
+    </a>
+  </div>
+</div>
 {% endblock %}
