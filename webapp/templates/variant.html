@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
-<h3>Variant Price Update</h3>
-<form method="post">
+<h3 class="mb-3"><i class="fa-solid fa-gears me-2"></i>Variant Price Update</h3>
+<form method="post" class="mb-3">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   {% for cat, chains in surcharges.items() %}
   <h5 class="mt-3">{{ cat|capitalize }}</h5>
@@ -16,9 +16,9 @@
   {% endfor %}
   <button class="btn btn-brand mt-2" type="submit">Save Changes</button>
 </form>
-<button id="start" class="btn btn-brand mt-3">Run Update</button>
+<button id="start" class="btn btn-brand">Run Update</button>
 <div id="spinner" class="spinner-border text-primary ms-2 d-none" role="status"></div>
-<pre id="log" class="mt-3 bg-light p-2" style="height:300px;overflow:auto;"></pre>
+<pre id="log" class="mt-3" style="height:300px;overflow:auto;"></pre>
 <div id="status" class="alert alert-success d-none mt-2"></div>
 {% endblock %}
 {% block scripts %}

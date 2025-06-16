@@ -67,6 +67,7 @@ def variant_updater():
     return render_template('variant.html', surcharges=surcharges)
 
 
+
 def stream_job(cmd):
     job_id = enqueue(cmd)
 
