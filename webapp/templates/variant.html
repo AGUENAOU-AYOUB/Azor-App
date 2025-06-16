@@ -5,7 +5,7 @@
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   {% for cat, chains in surcharges.items() %}
   <h5 class="mt-4">{{ cat|capitalize }}</h5>
-  <table class="table table-dark table-striped align-middle">
+  <table class="table table-striped align-middle">
     <thead><tr><th>Chain</th><th>Surcharge (€)</th></tr></thead>
     <tbody>
     {% for chain, val in chains.items() %}
@@ -28,7 +28,7 @@
 <div id="progress" class="progress mt-2 d-none">
   <div class="progress-bar progress-bar-striped progress-bar-animated" style="width:100%"></div>
 </div>
-<pre id="log" class="mt-3 bg-dark text-light p-2" style="height:300px;overflow:auto;"></pre>
+<pre id="log" class="mt-3 bg-light p-2" style="height:300px;overflow:auto;"></pre>
 <div id="status" class="alert alert-success d-none mt-2"></div>
 {% endblock %}
 {% block scripts %}
