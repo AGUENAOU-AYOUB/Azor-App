@@ -9,7 +9,7 @@
         <circle cx="8" cy="5.5" r="3" />
         <path d="M4 13c1.5-2 6-2 8 0" />
       </svg>
-      Login
+      {{ t('login') }}
     </h3>
 
     <form method="post">
@@ -21,7 +21,7 @@
             <path d="M2 14c0-3 4-5 6-5s6 2 6 5H2z" />
           </svg>
         </span>
-        <input class="form-control" type="text" name="username" placeholder="Username" required>
+        <input class="form-control" type="text" name="username" placeholder="{{ t('username') }}" required>
       </div>
       <div class="mb-3 input-group">
         <span class="input-group-text">
@@ -30,7 +30,7 @@
             <path d="M5 7V4a3 3 0 0 1 6 0v3" />
           </svg>
         </span>
-        <input class="form-control" id="password" type="password" name="password" placeholder="Password" required>
+        <input class="form-control" id="password" type="password" name="password" placeholder="{{ t('password') }}" required>
         <button class="btn btn-outline-secondary" type="button" id="togglePass">
           <svg class="icon eye-open" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
             <path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z" />
@@ -49,7 +49,7 @@
         <svg class="icon me-1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
           <path d="M8 3l4 5-4 5M1 8h11" stroke="currentColor" stroke-width="2" fill="none" />
         </svg>
-        Login
+        {{ t('login') }}
       </button>
 
     </form>

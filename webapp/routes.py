@@ -15,6 +15,13 @@ from .jobqueue import enqueue, stream
 
 main_bp = Blueprint('main', __name__)
 
+
+@main_bp.route('/toggle-language')
+def toggle_language():
+    current = session.get('lang', 'en')
+    session['lang'] = 'fr' if current == 'en' else 'en'
+    return redirect(request.referrer or url_for('main.home'))
+
 SCRIPTS = {
     'percentage': os.path.join('scripts', 'update_prices_shopify.py'),
     'variant': os.path.join('tempo solution', 'update_prices.py'),
