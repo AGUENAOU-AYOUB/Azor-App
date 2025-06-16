@@ -1,23 +1,39 @@
 :root {
-    --primary-color: #b8860b;
-    --dark-color: #3b2c20;
-    --light-bg: #f9f8f6;
+    --primary-color: #4B343B;
+    --secondary-color: #6C5158;
+    --accent-color: #D4A3A6;
+    --highlight-color: #EDE5E5;
+    --neutral-dark: #333333;
+    --neutral-light: #F7F7F7;
 }
 
 body {
-    font-family: 'Poppins', 'Inter', sans-serif;
-    background: linear-gradient(135deg, var(--light-bg), #f0e8d9);
-    color: #212529;
+    font-family: 'Montserrat', 'Poppins', sans-serif;
+    background: linear-gradient(135deg, var(--neutral-light), var(--highlight-color));
+    color: var(--neutral-dark);
     min-height: 100vh;
 }
 
 .navbar {
     background: #ffffff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--highlight-color);
 }
 
 .navbar-brand img {
-    height: 40px;
+    height: 45px;
+}
+
+.nav-link {
+    color: var(--primary-color) !important;
+}
+
+.nav-link:hover {
+    color: var(--secondary-color) !important;
+}
+
+.nav-link.active {
+    font-weight: 600;
 }
 
 .btn-brand {
@@ -25,6 +41,12 @@ body {
     border: none;
     color: #fff;
     transition: opacity 0.2s ease;
+}
+
+.btn-secondary {
+    background: var(--secondary-color);
+    border: none;
+    color: #fff;
 }
 
 .btn-brand:hover {
@@ -35,21 +57,25 @@ body {
     border: none;
     border-radius: 0.5rem;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    background: var(--highlight-color);
 }
 
 .service-card {
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .service-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
 }
 
-.table thead {
-    background: var(--dark-color);
-    color: #fff;
+#log {
+    background: var(--highlight-color);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.25rem;
+    padding: 0.75rem;
 }
 
-.table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgba(0, 0, 0, 0.02);
+.spinner-border.text-primary {
+    color: var(--primary-color);
 }
