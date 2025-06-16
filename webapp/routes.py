@@ -68,6 +68,13 @@ def variant_updater():
 
 
 
+@main_bp.route('/reset-prices')
+@login_required
+def reset_prices():
+    return render_template('reset.html')
+
+
+
 def stream_job(cmd):
     job_id = enqueue(cmd)
 
