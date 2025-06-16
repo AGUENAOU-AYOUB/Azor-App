@@ -4,7 +4,7 @@ import subprocess, os, json
 main_bp = Blueprint('main', __name__)
 
 SCRIPTS = {
-    'percentage': os.path.join('project-root', 'scripts', 'update_prices_shopify.py'),
+    'percentage': os.path.join('scripts', 'update_prices_shopify.py'),
     'variant': os.path.join('tempo solution', 'update_prices.py')
 }
 
