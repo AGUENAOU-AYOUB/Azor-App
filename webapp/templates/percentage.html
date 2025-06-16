@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
-<h3 class="mb-3"><i class="fa-solid fa-percent me-2"></i>Percentage Price Update</h3>
+<h3 class="mb-3"><i class="fa-solid fa-percent me-2"></i>{{ t('percentage_title') }}</h3>
 <div class="mb-3 row g-2 align-items-center">
   <div class="col-sm-4">
-    <input id="percent" class="form-control" type="number" step="0.01" placeholder="Enter percentage">
+    <input id="percent" class="form-control" type="number" step="0.01" placeholder="{{ t('enter_percentage') }}">
   </div>
   <div class="col-auto">
-    <button id="start" class="btn btn-brand">Run</button>
-    <button id="reset" class="btn btn-secondary ms-2">Reset</button>
+    <button id="start" class="btn btn-brand">{{ t('run') }}</button>
+    <button id="reset" class="btn btn-secondary ms-2">{{ t('reset') }}</button>
     <div id="spinner" class="spinner-border text-primary ms-2 d-none" role="status"></div>
   </div>
 </div>
@@ -33,7 +33,7 @@
         es.close();
         spinner.classList.add('d-none');
         startBtn.disabled = false;
-        status.textContent = 'Update completed!';
+        status.textContent = "{{ t('update_completed') }}";
         status.classList.remove('d-none');
       } else {
         log.textContent += e.data + '\n';
@@ -56,7 +56,7 @@
         spinner.classList.add('d-none');
         startBtn.disabled = false;
         resetBtn.disabled = false;
-        status.textContent = 'Reset completed!';
+        status.textContent = "{{ t('reset_completed') }}";
         status.classList.remove('d-none');
       } else {
         log.textContent += e.data + '\n';

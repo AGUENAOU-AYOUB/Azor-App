@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     const toggle = document.getElementById('togglePass');
     const openIcon = toggle ? toggle.querySelector('.eye-open') : null;
-    const closedIcon = toggle ? toggle.querySelector('.eye-closed') : null
+    const closedIcon = toggle ? toggle.querySelector('.eye-closed') : null;
+
+
     if (toggle) {
         toggle.addEventListener('click', () => {
             const pass = document.getElementById('password');

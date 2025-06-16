@@ -12,6 +12,7 @@ import os
 import json
 
 from .jobqueue import enqueue, stream
+from . import translate
 
 main_bp = Blueprint('main', __name__)
 
@@ -64,12 +65,12 @@ def variant_updater():
                 try:
                     updated[cat][chain] = float(val)
                 except ValueError:
-                    flash(f"Invalid value for {chain}", 'error')
+                    flash(translate('invalid_value', chain=chain), 'error')
                     return render_template('variant.html', surcharges=surcharges)
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(updated, f, indent=2)
         surcharges = updated
-        flash('Surcharges saved.', 'success')
+        flash(translate('surcharges_saved'), 'success')
 
     return render_template('variant.html', surcharges=surcharges)
 
