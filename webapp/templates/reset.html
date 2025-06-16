@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
-<h3 class="mb-3"><i class="fa-solid fa-rotate-left me-2"></i>Price Reset</h3>
-<p>This will restore all prices from the last backup file.</p>
-<button id="start" class="btn btn-brand">Run Reset</button>
+<h3 class="mb-3"><i class="fa-solid fa-rotate-left me-2"></i>{{ t('price_reset_title') }}</h3>
+<p>{{ t('price_reset_intro') }}</p>
+<button id="start" class="btn btn-brand">{{ t('run_reset') }}</button>
 <div id="spinner" class="spinner-border text-primary ms-2 d-none" role="status"></div>
 <pre id="log" class="mt-3" style="height:300px;overflow:auto;"></pre>
 <div id="status" class="alert alert-success d-none mt-2"></div>
@@ -24,7 +24,7 @@
         es.close();
         spinner.classList.add('d-none');
         startBtn.disabled = false;
-        status.textContent = 'Reset completed!';
+        status.textContent = "{{ t('reset_completed') }}";
         status.classList.remove('d-none');
       } else {
         log.textContent += e.data + '\n';
