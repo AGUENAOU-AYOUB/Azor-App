@@ -1,5 +1,5 @@
 .env
-project-root/scripts/shopify_backup.json
+scripts/shopify_backup.json
 # Python caches
 __pycache__/
 *.pyc
