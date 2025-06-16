@@ -1,19 +1,21 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="row justify-content-center">
+<div class="row justify-content-center py-5">
   <div class="col-md-4">
-    <h3 class="mb-3 text-center">Login</h3>
-    <form method="post" class="p-4 rounded" style="background:rgba(255,255,255,0.05)">
+    <h3 class="text-center mb-4">Login</h3>
+    <form method="post" class="p-4 rounded" style="background:rgba(255,255,255,0.05);border:1px solid rgba(212,175,55,0.2)">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="mb-3">
         <input class="form-control" type="text" name="username" placeholder="Username" required>
       </div>
       <div class="mb-3 input-group">
         <input class="form-control" type="password" id="password" name="password" placeholder="Password" required>
-        <button class="btn btn-secondary" type="button" id="togglePass"><span class="visually-hidden">Toggle password</span>&#128065;</button>
+        <button class="btn btn-outline-secondary" type="button" id="togglePass"><span class="visually-hidden">Toggle password</span><i class="bi bi-eye"></i></button>
       </div>
       {% if error %}<div class="text-danger mb-2">{{ error }}</div>{% endif %}
-      <button class="btn btn-brand w-100" type="submit">Login</button>
+      <div class="d-grid">
+        <button class="btn btn-brand" type="submit">Login</button>
+      </div>
     </form>
   </div>
 </div>
@@ -24,7 +26,11 @@
   if(toggle){
     toggle.addEventListener('click', () => {
       const pass = document.getElementById('password');
-      pass.type = pass.type === 'password' ? 'text' : 'password';
+      const icon = toggle.querySelector('i');
+      const show = pass.type === 'password';
+      pass.type = show ? 'text' : 'password';
+      icon.classList.toggle('bi-eye', !show);
+      icon.classList.toggle('bi-eye-slash', show);
     });
   }
 </script>
