@@ -8,9 +8,10 @@ from flask import (
     Response,
     flash,
 )
-import subprocess
 import os
 import json
+
+from .jobqueue import enqueue, stream
 
 main_bp = Blueprint('main', __name__)
 
@@ -65,12 +66,15 @@ def variant_updater():
     return render_template('variant.html', surcharges=surcharges)
 
 
-def stream_process(cmd):
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-    for line in iter(process.stdout.readline, ''):
-        yield f'data: {line.rstrip()}\n\n'
-    process.wait()
-    yield 'data: --done--\n\n'
+def stream_job(cmd):
+    job_id = enqueue(cmd)
+
+    def generator():
+        for line in stream(job_id):
+            yield f"data: {line}\n\n"
+        yield "data: --done--\n\n"
+
+    return generator()
 
 @main_bp.route('/stream/percentage')
 @login_required
@@ -79,10 +83,10 @@ def stream_percentage():
     if not percent:
         return 'Missing percent', 400
     cmd = ['python3', SCRIPTS['percentage'], '--percent', percent]
-    return Response(stream_process(cmd), mimetype='text/event-stream')
+    return Response(stream_job(cmd), mimetype='text/event-stream')
 
 @main_bp.route('/stream/variant')
 @login_required
 def stream_variant():
     cmd = ['python3', SCRIPTS['variant']]
-    return Response(stream_process(cmd), mimetype='text/event-stream')
+    return Response(stream_job(cmd), mimetype='text/event-stream')
