@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
 import os
+from . import translate
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -14,7 +15,7 @@ def login():
         if username == ADMIN_USER and password == ADMIN_PASS:
             session['user'] = username
             return redirect(url_for('main.home'))
-        return render_template('login.html', error='Invalid credentials')
+        return render_template('login.html', error=translate('login_error'))
     return render_template('login.html')
 
 @auth_bp.route('/logout')
