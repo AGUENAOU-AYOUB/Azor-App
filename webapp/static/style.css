@@ -1,13 +1,17 @@
 :root {
-    --primary-color: #b8860b;
-    --dark-color: #3b2c20;
-    --light-bg: #f9f8f6;
+    --primary-color: #B8860B;
+    --secondary-color-1: #8B4513;
+    --secondary-color-2: #A0522D;
+    --accent-color: #3B2F2F;
+    --bg-start: #F5F5DC;
+    --bg-end: #FFF8DC;
+    --text-color: #2F2F2F;
 }
 
 body {
     font-family: 'Poppins', 'Inter', sans-serif;
-    background: linear-gradient(135deg, var(--light-bg), #f0e8d9);
-    color: #212529;
+    background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
+    color: var(--text-color);
     min-height: 100vh;
 }
 
@@ -17,7 +21,15 @@ body {
 }
 
 .navbar-brand img {
-    height: 40px;
+    height: 45px;
+}
+
+.nav-link {
+    color: var(--accent-color) !important;
+}
+
+.nav-link.active {
+    font-weight: 600;
 }
 
 .btn-brand {
@@ -38,18 +50,21 @@ body {
 }
 
 .service-card {
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .service-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
 }
 
-.table thead {
-    background: var(--dark-color);
-    color: #fff;
+#log {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.25rem;
+    padding: 0.75rem;
 }
 
-.table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgba(0, 0, 0, 0.02);
+.spinner-border.text-primary {
+    color: var(--primary-color);
 }
