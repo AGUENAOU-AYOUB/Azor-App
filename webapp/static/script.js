@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const openIcon = toggle ? toggle.querySelector('.eye-open') : null;
     const closedIcon = toggle ? toggle.querySelector('.eye-closed') : null;
 
+
     if (toggle) {
         toggle.addEventListener('click', () => {
             const pass = document.getElementById('password');
@@ -17,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             toggle.classList.toggle('active', !isHidden);
+
         });
     }
 });

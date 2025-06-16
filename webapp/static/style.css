@@ -91,6 +91,7 @@ body {
 .d-none {
     display: none !important;
 }
+
 .input-group-text .icon {
     color: var(--secondary-color);
     transition: color 0.2s ease;
