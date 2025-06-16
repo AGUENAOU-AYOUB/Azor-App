@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
-<h3 class="mb-4">Welcome</h3>
+
+<h3 class="mb-4">Welcome {{ session['user'] }}</h3>
 <div class="row g-4">
   <div class="col-md-6 col-lg-4">
     <a href="{{ url_for('main.percentage_updater') }}" class="text-decoration-none text-reset">
