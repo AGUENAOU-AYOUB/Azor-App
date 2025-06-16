@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-import os, json, requests
+import os
+import json
+import requests
 from dotenv import load_dotenv
 import argparse
 
@@ -13,7 +15,7 @@ API_VERSION = os.getenv("API_VERSION", "2024-04")
 
 def main():
     p = argparse.ArgumentParser()
-    args = p.parse_args()
+    p.parse_args()
 
     session = requests.Session()
     session.headers.update({

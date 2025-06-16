@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-import os, json, requests, argparse
+import os
+import json
+import requests
+import argparse
 from dotenv import load_dotenv
 
 # 1) Load .env
@@ -22,7 +25,8 @@ def fetch_all_variants(session, base_url):
     variants, page_info = [], None
     while True:
         params = {"limit": 250}
-        if page_info: params["page_info"] = page_info
+        if page_info:
+            params["page_info"] = page_info
         resp = session.get(f"{base_url}/products.json", params=params)
         resp.raise_for_status()
         data = resp.json()
