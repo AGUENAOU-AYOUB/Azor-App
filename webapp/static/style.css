@@ -18,10 +18,18 @@ body {
     background: #ffffff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid var(--highlight-color);
+    padding: 0.5rem 1rem;
 }
 
-.navbar-brand img {
-    height: 45px;
+.navbar-brand .logo-img {
+    height: 40px;
+    margin-right: 0.5rem;
+}
+
+.navbar-brand .logo-text {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
 }
 
 .nav-link {
