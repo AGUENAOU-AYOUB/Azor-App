@@ -89,7 +89,6 @@ body {
     transition: color 0.2s ease;
 }
 
-
 .input-group:focus-within .input-group-text i {
     color: var(--accent-color);
 }
@@ -103,7 +102,7 @@ body {
 #togglePass:hover {
     color: var(--accent-color);
 }
-\
+
 .btn-brand i {
     transition: transform 0.2s ease;
 }

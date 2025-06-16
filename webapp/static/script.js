@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             toggle.classList.toggle('active', !isHidden);
-
         });
     }
 });
