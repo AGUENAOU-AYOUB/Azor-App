@@ -24,6 +24,12 @@ This repository contains tools to update Shopify variant prices and now includes
    ```
 4. Visit `http://localhost:5000` and log in with the credentials above.
 
+## Background Worker
+
+The updater scripts now run in a small asynchronous job queue. The worker
+thread starts automatically when the web server launches, so no extra setup is
+required.
+
 ## Using the Updaters
 
 - **Percentage Updater** adjusts prices by a percentage and uses `scripts/update_prices_shopify.py`. Enter the desired percentage and monitor the real-time log while the script runs.
