@@ -1,0 +1,55 @@
+:root {
+    --primary-color: #b8860b;
+    --dark-color: #3b2c20;
+    --light-bg: #f9f8f6;
+}
+
+body {
+    font-family: 'Poppins', 'Inter', sans-serif;
+    background: linear-gradient(135deg, var(--light-bg), #f0e8d9);
+    color: #212529;
+    min-height: 100vh;
+}
+
+.navbar {
+    background: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand img {
+    height: 40px;
+}
+
+.btn-brand {
+    background: var(--primary-color);
+    border: none;
+    color: #fff;
+    transition: opacity 0.2s ease;
+}
+
+.btn-brand:hover {
+    opacity: 0.85;
+}
+
+.card {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.service-card {
+    transition: transform 0.2s ease;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+}
+
+.table thead {
+    background: var(--dark-color);
+    color: #fff;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
