@@ -45,3 +45,15 @@ variant price from Shopify and stores them in a file named
 `reset_prices_shopify.py` to restore the original prices later.  The backup can
 grow to around **500&nbsp;KB** depending on the number of variants, so it is now
 ignored by Git and will be recreated whenever needed.
+
+## Deploying in Production
+
+1. Install the dependencies (only required once):
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Set the necessary environment variables. You can copy `.env.example` to `.env` or configure them in your hosting platform.
+3. Start the server with Gunicorn:
+   ```bash
+   gunicorn run_webapp:app -b 0.0.0.0:8000
+   ```
