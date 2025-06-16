@@ -91,3 +91,30 @@ body {
 .d-none {
     display: none !important;
 }
+
+.input-group-text .icon {
+    color: var(--secondary-color);
+    transition: color 0.2s ease;
+}
+
+.input-group:focus-within .input-group-text .icon {
+    color: var(--accent-color);
+}
+
+#togglePass {
+    color: var(--secondary-color);
+    transition: color 0.2s ease;
+}
+
+#togglePass.active,
+#togglePass:hover {
+    color: var(--accent-color);
+}
+
+.btn-brand svg {
+    transition: transform 0.2s ease;
+}
+
+.btn-brand:hover svg {
+    transform: translateX(0.25rem);
+}

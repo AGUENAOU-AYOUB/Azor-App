@@ -11,10 +11,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const isHidden = pass.type === 'password';
             pass.type = isHidden ? 'text' : 'password';
+
             if (openIcon && closedIcon) {
                 openIcon.classList.toggle('d-none', !isHidden);
                 closedIcon.classList.toggle('d-none', isHidden);
             }
+
+            toggle.classList.toggle('active', !isHidden);
+
         });
     }
 });
