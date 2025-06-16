@@ -25,3 +25,9 @@ def test_login_with_default_credentials(client):
     resp = client.post('/login', data={'username': 'admin', 'password': 'password'}, follow_redirects=True)
     assert resp.status_code == 200
     assert b'Welcome' in resp.data
+
+
+def test_login_form_contains_csrf(client):
+    resp = client.get('/login')
+    assert resp.status_code == 200
+    assert b'<input type="hidden" name="csrf_token"' in resp.data

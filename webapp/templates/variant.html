@@ -2,7 +2,7 @@
 {% block content %}
 <h3>Variant Price Update</h3>
 <form method="post">
-  {{ csrf_token() }}
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   {% for cat, chains in surcharges.items() %}
   <h5 class="mt-3">{{ cat|capitalize }}</h5>
   {% for chain, val in chains.items() %}
