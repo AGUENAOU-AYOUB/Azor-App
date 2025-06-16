@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-<h3>Percentage Price Update</h3>
+<h3 class="text-center">Percentage Price Update</h3>
 <div class="mb-3">
   <input id="percent" class="form-control" type="number" step="0.01" placeholder="Enter percentage">
 </div>
@@ -23,6 +23,10 @@
   startBtn.onclick = function(){
     if(!confirm('Run percentage update?')) return;
     const p = document.getElementById('percent').value;
+    if(!p){
+      alert('Please enter a percentage');
+      return;
+    }
     const log = document.getElementById('log');
     log.textContent='';
     status.classList.add('d-none');
