@@ -164,7 +164,9 @@ def main():
             batch = updates[i:i+50]
             resp = graphql_post(session, mutation, {
                 "productId": f"gid://shopify/Product/{pid}",
+
                 "variants": batch
+
             })
             if resp.ok:
                 errors = resp.json()["data"]["productVariantsBulkUpdate"]["userErrors"]
@@ -172,6 +174,7 @@ def main():
                     for e in errors:
                         print(f"❌ {e['field']}: {e['message']}")
                 for u in batch:
+
                     print(f"✅  {u['id'].split('/')[-1]} → {u['price']}")
             else:
                 print(f"❌  bulk update failed: {resp.text}")

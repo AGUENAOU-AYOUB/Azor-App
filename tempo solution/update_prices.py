@@ -6,13 +6,12 @@ update_prices.py  –  one-shot Shopify variant price updater
  • Reads base price from metafield   custom.base_price
  • Adds surcharge from variant_prices.json
  • BUT:  "Forsat S" surcharge is forced to 0.0  → price = base_price
- • Rounds:  …xx.00  if decimal < 0.5   else  …xx.90
+ • No rounding is applied – prices match the exact surcharge values
 """
 
 import os
 import sys
 import json
-import math
 import time
 import textwrap
 import requests
@@ -89,10 +88,6 @@ def base_price(product_id):
     return None
 
 
-def smart_round(x: float) -> float:
-    return math.floor(x) + (0.9 if (x % 1) >= 0.5 else 0)
-
-
 def set_base_price(product_id: int, price: float) -> None:
     """Update the product's custom.base_price metafield."""
     mutation = """
@@ -156,6 +151,7 @@ def main():
     current_pid = None
     batch = []
 
+
     for prod in paginate_products():
         tags = {t.strip().lower() for t in prod["tags"].split(",")}
         if "chaine_update" not in tags:
@@ -191,7 +187,7 @@ def main():
 
             # Forsat S rule
             surcharge = 0.0 if chain == "Forsat S" else surcharges[cat][chain]
-            new_price = smart_round(bp + surcharge)
+            new_price = bp + surcharge
             if chain == "Forsat S" and new_price != bp:
                 set_base_price(prod["id"], new_price)
                 bp = new_price
@@ -203,12 +199,15 @@ def main():
             batch.append({"id": f"gid://shopify/ProductVariant/{v['id']}", "price": str(new_price)})
             print(f"   └─ {chain:<10} → {new_price}")
             if len(batch) == 50:
+
                 send_batch(current_pid, batch)
+
                 batch = []
 
         updated += 1
 
         if batch:
+
             send_batch(current_pid, batch)
             batch = []
 
@@ -216,6 +215,7 @@ def main():
     if batch:
         send_batch(current_pid, batch)
         batch = []
+
 
     print(f"\nDone. Updated {updated} product(s).")
 
