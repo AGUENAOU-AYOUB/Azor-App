@@ -93,6 +93,34 @@ def smart_round(x: float) -> float:
     return math.floor(x) + (0.9 if (x % 1) >= 0.5 else 0)
 
 
+def set_base_price(product_id: int, price: float) -> None:
+    """Update the product's custom.base_price metafield."""
+    mutation = """
+    mutation SetBase($mf: [MetafieldsSetInput!]!) {
+      metafieldsSet(metafields: $mf) {
+        userErrors { field message }
+      }
+    }
+    """
+    variables = {
+        "mf": [
+            {
+                "ownerId": f"gid://shopify/Product/{product_id}",
+                "namespace": "custom",
+                "key": "base_price",
+                "type": "number_decimal",
+                "value": str(price),
+            }
+        ]
+    }
+    resp = graphql_post(mutation, variables)
+    if resp.ok:
+        for err in resp.json()["data"]["metafieldsSet"]["userErrors"]:
+            print(f"❌ base_price {product_id}: {err['message']}")
+    else:
+        print(f"❌ base_price {product_id}: {resp.text}")
+
+
 def send_batch(batch):
     """Send a batch of variant price updates using productVariantsBulkUpdate."""
     if not batch:
@@ -153,6 +181,9 @@ def main():
             # Forsat S rule
             surcharge = 0.0 if chain == "Forsat S" else surcharges[cat][chain]
             new_price = smart_round(bp + surcharge)
+            if chain == "Forsat S" and new_price != bp:
+                set_base_price(prod["id"], new_price)
+                bp = new_price
 
             if float(v["price"]) == new_price:
                 print(f"   └─ {chain:<10} already {new_price}")

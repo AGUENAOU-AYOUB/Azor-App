@@ -44,6 +44,44 @@ def round_to_tidy(price: float) -> str:
     tidy = min(opts, key=lambda x: abs(price_int - x))
     return f"{tidy:.2f}"
 
+def fetch_base_price(session, base_url, product_id):
+    resp = shopify_get(session, f"{base_url}/products/{product_id}/metafields.json")
+    resp.raise_for_status()
+    for mf in resp.json().get("metafields", []):
+        if mf.get("namespace") == "custom" and mf.get("key") == "base_price":
+            try:
+                return float(mf["value"])
+            except (KeyError, TypeError, ValueError):
+                return None
+    return None
+
+
+def set_base_price(session, product_id, price):
+    mutation = """
+    mutation SetBase($mf: [MetafieldsSetInput!]!) {
+      metafieldsSet(metafields: $mf) {
+        userErrors { field message }
+      }
+    }
+    """
+    variables = {
+        "mf": [
+            {
+                "ownerId": f"gid://shopify/Product/{product_id}",
+                "namespace": "custom",
+                "key": "base_price",
+                "type": "number_decimal",
+                "value": str(price),
+            }
+        ]
+    }
+    resp = graphql_post(session, mutation, variables)
+    if resp.ok:
+        for e in resp.json()["data"]["metafieldsSet"]["userErrors"]:
+            print(f"❌ base_price {product_id}: {e['message']}")
+    else:
+        print(f"❌ base_price {product_id}: {resp.text}")
+
 def fetch_all_variants(session, base_url):
     variants, page_info = [], None
     while True:
@@ -92,6 +130,14 @@ def main():
         with open(backup_file, "r", encoding="utf-8") as bf:
             variants = json.load(bf)
 
+    product_ids = {v["product_id"] for v in variants}
+    factor = 1 + args.percent / 100.0
+    new_base = {}
+    for pid in product_ids:
+        bp = fetch_base_price(session, base_url, pid)
+        if bp is not None:
+            new_base[pid] = round_to_tidy(bp * factor)
+
     # 5) Apply percentage + tidy rounding
     updates = []
     mutation = """
@@ -136,6 +182,9 @@ def main():
                 print(f"✅  {u['id'].split('/')[-1]} → {u['price']}")
         else:
             print(f"❌  bulk update failed: {resp.text}")
+
+    for pid, price in new_base.items():
+        set_base_price(session, pid, price)
 
     print("🎉 Finished updating!")
 
