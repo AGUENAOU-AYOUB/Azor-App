@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 update_prices.py  –  one-shot Shopify variant price updater
+Now submits a single GraphQL bulk mutation for all variant updates.
 ────────────────────────────────────────────────────────────
  • Picks every product tagged CHAINE_UPDATE  +  bracelet/collier
  • Reads base price from metafield   custom.base_price
@@ -23,6 +24,8 @@ load_dotenv()                                   # expect .env in same dir
 SHOP_DOMAIN = os.getenv("SHOP_DOMAIN")          # azorjewelry.myshopify.com
 API_TOKEN   = os.getenv("API_TOKEN")            # shpat_****
 API_VERSION = os.getenv("API_VERSION", "2024-04")
+
+GRAPHQL_URL = f"https://{SHOP_DOMAIN}/admin/api/{API_VERSION}/graphql.json"
 
 HEADERS = {
     "X-Shopify-Access-Token": API_TOKEN,
@@ -50,15 +53,57 @@ def get(endpoint, params=None):
         return r
 
 
-def put(endpoint, payload):
-    url = f"https://{SHOP_DOMAIN}/admin/api/{API_VERSION}/{endpoint}"
+
+def graphql(query: str, variables=None):
     while True:
-        r = requests.put(url, headers=HEADERS, json=payload)
+        r = requests.post(GRAPHQL_URL, headers=HEADERS, json={"query": query, "variables": variables})
         if r.status_code == 429:
             time.sleep(2)
             continue
         r.raise_for_status()
-        return r
+        data = r.json()
+        if "errors" in data:
+            raise RuntimeError(data["errors"])
+        return data["data"]
+
+def build_mutation(updates):
+    parts = []
+    for i, u in enumerate(updates):
+        alias = f"v{i}"
+        gid = f"gid://shopify/ProductVariant/{u['id']}"
+        parts.append(
+            f"{alias}: productVariantUpdate(input: {{id: \"{gid}\", price: \"{u['price']}\"}}) {{ userErrors {{ field message }} }}"
+        )
+    inner = "\n".join(parts)
+    return f"mutation {{\n{inner}\n}}"
+
+def run_bulk(updates):
+    if not updates:
+        print("Nothing to update.")
+        return
+    mutation = build_mutation(updates)
+    bulk_query = (
+        "mutation($m:String!) {\n"
+        "  bulkOperationRunMutation(mutation: $m) {\n"
+        "    bulkOperation { id status }\n"
+        "    userErrors { field message }\n"
+        "  }\n"
+        "}"
+    )
+    resp = graphql(bulk_query, {"m": mutation})
+    print(json.dumps(resp, indent=2))
+    op_id = resp["bulkOperationRunMutation"]["bulkOperation"]["id"]
+    while True:
+        status = graphql(
+            "query($id:ID!){\n  node(id:$id){... on BulkOperation{status,errorCode,objectCount,createdAt,completedAt,url}}\n}",
+            {"id": op_id},
+        )
+        node = status["node"]
+        print(f"Status: {node['status']}")
+        if node["status"] in {"COMPLETED", "FAILED", "CANCELED"}:
+            print(json.dumps(node, indent=2))
+            break
+        time.sleep(5)
 
 
 def paginate_products():
@@ -98,6 +143,7 @@ def main():
 
     surcharges = load_surcharges()
     updated = 0
+    updates = []
 
     for prod in paginate_products():
         tags = {t.strip().lower() for t in prod["tags"].split(",")}
@@ -134,11 +180,12 @@ def main():
                 print(f"   └─ {chain:<10} already {new_price}")
                 continue
 
-            put(f"variants/{v['id']}.json", {"variant": {"id": v["id"], "price": new_price}})
+            updates.append({"id": v["id"], "price": str(new_price)})
             print(f"   └─ {chain:<10} → {new_price}")
 
         updated += 1
 
+    run_bulk(updates)
     print(f"\nDone. Updated {updated} product(s).")
 
 

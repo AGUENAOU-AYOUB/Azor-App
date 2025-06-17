@@ -4,6 +4,8 @@ import json
 import requests
 import argparse
 import time
+
+"""Adjust all variant prices by a percentage using a GraphQL bulk mutation."""
 from dotenv import load_dotenv
 
 # 1) Load .env
@@ -13,6 +15,8 @@ load_dotenv()
 TOKEN       = os.getenv("API_TOKEN")
 DOMAIN      = os.getenv("SHOP_DOMAIN")
 API_VERSION = os.getenv("API_VERSION", "2024-04")
+
+GRAPHQL_URL = f"https://{DOMAIN}/admin/api/{API_VERSION}/graphql.json"
 
 
 def shopify_get(session, url, **kwargs):
@@ -25,14 +29,58 @@ def shopify_get(session, url, **kwargs):
         return resp
 
 
-def shopify_put(session, url, **kwargs):
-    """PUT request with basic retry handling for rate limits."""
+
+def graphql(session: requests.Session, query: str, variables=None):
     while True:
-        resp = session.put(url, **kwargs)
+        resp = session.post(GRAPHQL_URL, json={"query": query, "variables": variables})
         if resp.status_code == 429:
             time.sleep(2)
             continue
-        return resp
+        resp.raise_for_status()
+        data = resp.json()
+        if "errors" in data:
+            raise RuntimeError(data["errors"])
+        return data["data"]
+
+def build_mutation(updates):
+    parts = []
+    for i, item in enumerate(updates):
+        alias = f"v{i}"
+        gid = f"gid://shopify/ProductVariant/{item['id']}"
+        parts.append(
+            f"{alias}: productVariantUpdate(input: {{id: \"{gid}\", price: \"{item['price']}\"}}) {{ userErrors {{ field message }} }}"
+        )
+    inner = "\n".join(parts)
+    return f"mutation {{\n{inner}\n}}"
+
+def run_bulk(session, updates):
+    if not updates:
+        print("Nothing to update.")
+        return
+    mutation = build_mutation(updates)
+    bulk_query = (
+        "mutation($m:String!) {\n"
+        "  bulkOperationRunMutation(mutation: $m) {\n"
+        "    bulkOperation { id status }\n"
+        "    userErrors { field message }\n"
+        "  }\n"
+        "}"
+    )
+    resp = graphql(session, bulk_query, {"m": mutation})
+    print(json.dumps(resp, indent=2))
+    op_id = resp["bulkOperationRunMutation"]["bulkOperation"]["id"]
+    while True:
+        status = graphql(
+            session,
+            "query($id:ID!){\n  node(id:$id){... on BulkOperation{status,errorCode,objectCount,createdAt,completedAt,url}}\n}",
+            {"id": op_id},
+        )
+        node = status["node"]
+        print(f"Status: {node['status']}")
+        if node["status"] in {"COMPLETED", "FAILED", "CANCELED"}:
+            print(json.dumps(node, indent=2))
+            break
+        time.sleep(5)
 
 def round_to_tidy(price: float) -> str:
     price_int = int(round(price))
@@ -90,20 +138,15 @@ def main():
         with open(backup_file, "r", encoding="utf-8") as bf:
             variants = json.load(bf)
 
-    # 5) Apply percentage + tidy rounding
+    # 5) Apply percentage + tidy rounding using a bulk mutation
+    updates = []
     for v in variants:
         base = float(v["original_price"])
         newp = base * (1 + args.percent/100.0)
         tidy = round_to_tidy(newp)
+        updates.append({"id": v["variant_id"], "price": tidy})
 
-        url = f"{base_url}/variants/{v['variant_id']}.json"
-        payload = {"variant": {"id": v["variant_id"], "price": tidy}}
-        resp = shopify_put(session, url, json=payload)
-        if resp.ok:
-            print(f"✅  {v['variant_id']} → {tidy}")
-        else:
-            print(f"❌  {v['variant_id']} failed: {resp.text}")
-
+    run_bulk(session, updates)
     print("🎉 Finished updating!")
 
 if __name__=="__main__":

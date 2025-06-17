@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3 class="mb-3"><i class="fa-solid fa-boxes-stacked me-2"></i>{{ t('bulk_title') }}</h3>
+<p>{{ t('bulk_intro') }}</p>
+<button id="start" class="btn btn-brand">{{ t('run') }}</button>
+<div id="spinner" class="spinner-border text-primary ms-2 d-none" role="status"></div>
+<pre id="log" class="mt-3" style="height:300px;overflow:auto;"></pre>
+<div id="status" class="alert alert-success d-none mt-2"></div>
+{% endblock %}
+{% block scripts %}
+<script>
+  const startBtn = document.getElementById('start');
+  const spinner = document.getElementById('spinner');
+  const status = document.getElementById('status');
+  startBtn.onclick = function(){
+    const log = document.getElementById('log');
+    log.textContent='';
+    status.classList.add('d-none');
+    spinner.classList.remove('d-none');
+    startBtn.disabled = true;
+    const es = new EventSource('/stream/bulk');
+    es.onmessage = e => {
+      if(e.data === '--done--') {
+        es.close();
+        spinner.classList.add('d-none');
+        startBtn.disabled = false;
+        status.textContent = "{{ t('update_completed') }}";
+        status.classList.remove('d-none');
+      } else {
+        log.textContent += e.data + '\n';
+      }
+      log.scrollTop = log.scrollHeight;
+    };
+  };
+</script>
+{% endblock %}
