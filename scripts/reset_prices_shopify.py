@@ -4,6 +4,7 @@ import json
 import requests
 from dotenv import load_dotenv
 import argparse
+import time
 
 # 1) Load .env
 load_dotenv()
@@ -12,6 +13,18 @@ load_dotenv()
 TOKEN       = os.getenv("API_TOKEN")
 DOMAIN      = os.getenv("SHOP_DOMAIN")
 API_VERSION = os.getenv("API_VERSION", "2024-04")
+
+
+def graphql_post(session, query, variables=None):
+    """POST to Shopify's GraphQL API with basic retry for rate limits."""
+    url = f"https://{DOMAIN}/admin/api/{API_VERSION}/graphql.json"
+    payload = {"query": query, "variables": variables or {}}
+    while True:
+        resp = session.post(url, json=payload)
+        if resp.status_code == 429:
+            time.sleep(2)
+            continue
+        return resp
 
 def main():
     p = argparse.ArgumentParser()
@@ -22,7 +35,6 @@ def main():
         "X-Shopify-Access-Token": TOKEN,
         "Content-Type": "application/json"
     })
-    base_url = f"https://{DOMAIN}/admin/api/{API_VERSION}"
 
     backup_file = os.path.join(os.path.dirname(__file__), "shopify_backup.json")
     if not os.path.exists(backup_file):
@@ -30,14 +42,38 @@ def main():
         return
 
     variants = json.load(open(backup_file, "r", encoding="utf-8"))
-    for v in variants:
-        url = f"{base_url}/variants/{v['variant_id']}.json"
-        payload = {"variant": {"id": v["variant_id"], "price": v["original_price"]}}
-        resp = session.put(url, json=payload)
+
+    mutation = """
+    mutation BulkUpdate($variants: [ProductVariantBulkInput!]!) {
+      productVariantsBulkUpdate(variants: $variants) {
+        userErrors { field message }
+      }
+    }
+    """
+
+    batch = []
+    def send_batch(items):
+        resp = graphql_post(session, mutation, {"variants": items})
         if resp.ok:
-            print(f"🔄  {v['variant_id']} → {v['original_price']}")
+            errors = resp.json()["data"]["productVariantsBulkUpdate"]["userErrors"]
+            for e in errors:
+                print(f"❌ {e['field']}: {e['message']}")
+            for u in items:
+                print(f"🔄  {u['id'].split('/')[-1]} → {u['price']}")
         else:
-            print(f"❌  reset {v['variant_id']}: {resp.text}")
+            print(f"❌  bulk update failed: {resp.text}")
+
+    for v in variants:
+        batch.append({
+            "id": f"gid://shopify/ProductVariant/{v['variant_id']}",
+            "price": v["original_price"],
+        })
+        if len(batch) == 50:
+            send_batch(batch)
+            batch = []
+
+    if batch:
+        send_batch(batch)
 
     print("✅  All prices reset.")
 
