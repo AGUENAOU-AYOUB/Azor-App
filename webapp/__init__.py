@@ -11,6 +11,7 @@ TRANSLATIONS = {
     'home': {'en': 'Home', 'fr': 'Accueil'},
     'percentage': {'en': 'Percentage', 'fr': 'Pourcentage'},
     'variant': {'en': 'Variant', 'fr': 'Variante'},
+    'bulk': {'en': 'Bulk', 'fr': 'Lot'},
     'logout': {'en': 'Logout', 'fr': 'Déconnexion'},
     'language': {'en': 'Français', 'fr': 'English'},
     'login': {'en': 'Login', 'fr': 'Connexion'},
@@ -26,6 +27,11 @@ TRANSLATIONS = {
     'variant_card_desc': {
         'en': 'Update variant surcharges individually.',
         'fr': 'Mettre à jour chaque supplément de variante individuellement.'
+    },
+    'bulk_card_title': {'en': 'Bulk Price Updater', 'fr': 'Mise à jour en lot'},
+    'bulk_card_desc': {
+        'en': 'Run a GraphQL bulk mutation from a JSON file.',
+        'fr': 'Lancer une mise à jour en lot depuis un fichier JSON.'
     },
     'percentage_title': {'en': 'Percentage Price Update', 'fr': 'Mise à jour des prix par pourcentage'},
     'enter_percentage': {'en': 'Enter percentage', 'fr': 'Entrez le pourcentage'},
@@ -47,6 +53,11 @@ TRANSLATIONS = {
     'invalid_value': {
         'en': 'Invalid value for {chain}',
         'fr': 'Valeur invalide pour {chain}'
+    },
+    'bulk_title': {'en': 'Bulk Price Update', 'fr': 'Mise à jour en lot'},
+    'bulk_intro': {
+        'en': 'The script will read "scripts/bulk_updates.json" and run a GraphQL bulk mutation.',
+        'fr': 'Le script lira "scripts/bulk_updates.json" et lancera une mutation GraphQL en lot.'
     },
 }
 
