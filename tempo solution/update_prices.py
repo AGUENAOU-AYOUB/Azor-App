@@ -148,6 +148,7 @@ def main():
     surcharges = load_surcharges()
     updated = 0
 
+
     for prod in paginate_products():
         batch = []
         tags = {t.strip().lower() for t in prod["tags"].split(",")}
@@ -159,7 +160,13 @@ def main():
             print(f"• Skip {prod['title']} (no bracelet/collier tag)")
             continue
 
-        bp = base_price(prod["id"])
+        pid = prod["id"]
+        if current_pid and current_pid != pid and batch:
+            send_batch(current_pid, batch)
+            batch = []
+        current_pid = pid
+
+        bp = base_price(pid)
         if bp is None:
             print(f"• Skip {prod['title']} (missing base_price)")
             continue
@@ -191,12 +198,15 @@ def main():
             print(f"   └─ {chain:<10} → {new_price}")
             if len(batch) == 50:
                 send_batch(prod["id"], batch)
+
                 batch = []
 
         updated += 1
 
         if batch:
+
             send_batch(prod["id"], batch)
+
 
     print(f"\nDone. Updated {updated} product(s).")
 

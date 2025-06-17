@@ -50,7 +50,9 @@ def main():
       }
     }
     """
+
     batches = {}
+
 
     def send_batch(pid, items):
         resp = graphql_post(session, mutation, {
@@ -68,6 +70,7 @@ def main():
 
     for v in variants:
         pid = v["product_id"]
+
         batches.setdefault(pid, [])
         batches[pid].append({
             "id": f"gid://shopify/ProductVariant/{v['variant_id']}",
@@ -80,6 +83,7 @@ def main():
     for pid, batch in batches.items():
         if batch:
             send_batch(pid, batch)
+
 
     print("✅  All prices reset.")
 
