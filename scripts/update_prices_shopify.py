@@ -139,40 +139,49 @@ def main():
             new_base[pid] = round_to_tidy(bp * factor)
 
     # 5) Apply percentage + tidy rounding
-    updates = []
     mutation = """
-    mutation BulkUpdate($variants: [ProductVariantBulkInput!]!) {
-      productVariantsBulkUpdate(variants: $variants) {
+    mutation BulkUpdate($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+      productVariantsBulkUpdate(productId: $productId, variants: $variants) {
         userErrors { field message }
       }
     }
     """
-
+    updates_by_product = {}
     for v in variants:
         base = float(v["original_price"])
         newp = base * (1 + args.percent/100.0)
         tidy = round_to_tidy(newp)
 
-        updates.append({
+        pid = v["product_id"]
+        updates_by_product.setdefault(pid, [])
+        updates_by_product[pid].append({
             "id": f"gid://shopify/ProductVariant/{v['variant_id']}",
             "price": tidy,
         })
 
-        if len(updates) == 50:
-            resp = graphql_post(session, mutation, {"variants": updates})
+        if len(updates_by_product[pid]) == 50:
+            resp = graphql_post(session, mutation, {
+                "productId": f"gid://shopify/Product/{pid}",
+                "variants": updates_by_product[pid]
+            })
             if resp.ok:
                 errors = resp.json()["data"]["productVariantsBulkUpdate"]["userErrors"]
                 if errors:
                     for e in errors:
                         print(f"❌ {e['field']}: {e['message']}")
-                for u in updates:
+                for u in updates_by_product[pid]:
                     print(f"✅  {u['id'].split('/')[-1]} → {u['price']}")
             else:
                 print(f"❌  bulk update failed: {resp.text}")
-            updates = []
+            updates_by_product[pid] = []
 
-    if updates:
-        resp = graphql_post(session, mutation, {"variants": updates})
+    for pid, updates in updates_by_product.items():
+        if not updates:
+            continue
+        resp = graphql_post(session, mutation, {
+            "productId": f"gid://shopify/Product/{pid}",
+            "variants": updates
+        })
         if resp.ok:
             errors = resp.json()["data"]["productVariantsBulkUpdate"]["userErrors"]
             if errors:
