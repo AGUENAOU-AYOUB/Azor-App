@@ -163,12 +163,14 @@ def main():
             resp = graphql_post(session, mutation, {
                 "productId": f"gid://shopify/Product/{pid}",
                 "variants": updates_by_product[pid]
+
             })
             if resp.ok:
                 errors = resp.json()["data"]["productVariantsBulkUpdate"]["userErrors"]
                 if errors:
                     for e in errors:
                         print(f"❌ {e['field']}: {e['message']}")
+
                 for u in updates_by_product[pid]:
                     print(f"✅  {u['id'].split('/')[-1]} → {u['price']}")
             else:

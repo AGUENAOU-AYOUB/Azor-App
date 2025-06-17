@@ -50,7 +50,11 @@ def main():
       }
     }
     """
+<<<<<<< tausj0-codex/update-scripts-to-use-productvariantsbulkupdate
     batches = {}
+=======
+    updates_by_product = {}
+>>>>>>> main
 
     def send_batch(pid, items):
         resp = graphql_post(session, mutation, {
@@ -68,6 +72,7 @@ def main():
 
     for v in variants:
         pid = v["product_id"]
+<<<<<<< tausj0-codex/update-scripts-to-use-productvariantsbulkupdate
         batches.setdefault(pid, [])
         batches[pid].append({
             "id": f"gid://shopify/ProductVariant/{v['variant_id']}",
@@ -80,6 +85,17 @@ def main():
     for pid, batch in batches.items():
         if batch:
             send_batch(pid, batch)
+=======
+        updates_by_product.setdefault(pid, [])
+        updates_by_product[pid].append({
+            "id": f"gid://shopify/ProductVariant/{v['variant_id']}",
+            "price": v["original_price"],
+        })
+
+    for pid, items in updates_by_product.items():
+        for i in range(0, len(items), 50):
+            send_batch(pid, items[i:i+50])
+>>>>>>> main
 
     print("✅  All prices reset.")
 
