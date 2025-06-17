@@ -3,6 +3,7 @@ import os
 import json
 import requests
 import argparse
+import time
 from dotenv import load_dotenv
 
 # 1) Load .env
@@ -12,6 +13,26 @@ load_dotenv()
 TOKEN       = os.getenv("API_TOKEN")
 DOMAIN      = os.getenv("SHOP_DOMAIN")
 API_VERSION = os.getenv("API_VERSION", "2024-04")
+
+
+def shopify_get(session, url, **kwargs):
+    """GET request with basic retry handling for rate limits."""
+    while True:
+        resp = session.get(url, **kwargs)
+        if resp.status_code == 429:
+            time.sleep(2)
+            continue
+        return resp
+
+
+def shopify_put(session, url, **kwargs):
+    """PUT request with basic retry handling for rate limits."""
+    while True:
+        resp = session.put(url, **kwargs)
+        if resp.status_code == 429:
+            time.sleep(2)
+            continue
+        return resp
 
 def round_to_tidy(price: float) -> str:
     price_int = int(round(price))
@@ -27,7 +48,7 @@ def fetch_all_variants(session, base_url):
         params = {"limit": 250}
         if page_info:
             params["page_info"] = page_info
-        resp = session.get(f"{base_url}/products.json", params=params)
+        resp = shopify_get(session, f"{base_url}/products.json", params=params)
         resp.raise_for_status()
         data = resp.json()
         for prod in data["products"]:
@@ -77,7 +98,7 @@ def main():
 
         url = f"{base_url}/variants/{v['variant_id']}.json"
         payload = {"variant": {"id": v["variant_id"], "price": tidy}}
-        resp = session.put(url, json=payload)
+        resp = shopify_put(session, url, json=payload)
         if resp.ok:
             print(f"✅  {v['variant_id']} → {tidy}")
         else:
