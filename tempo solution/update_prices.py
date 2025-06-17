@@ -50,10 +50,12 @@ def get(endpoint, params=None):
         return r
 
 
-def put(endpoint, payload):
-    url = f"https://{SHOP_DOMAIN}/admin/api/{API_VERSION}/{endpoint}"
+GRAPHQL_URL = f"https://{SHOP_DOMAIN}/admin/api/{API_VERSION}/graphql.json"
+
+def graphql_post(query, variables=None):
+    payload = {"query": query, "variables": variables or {}}
     while True:
-        r = requests.put(url, headers=HEADERS, json=payload)
+        r = requests.post(GRAPHQL_URL, headers=HEADERS, json=payload)
         if r.status_code == 429:
             time.sleep(2)
             continue
@@ -91,6 +93,27 @@ def smart_round(x: float) -> float:
     return math.floor(x) + (0.9 if (x % 1) >= 0.5 else 0)
 
 
+def send_batch(batch):
+    """Send a batch of variant price updates using productVariantsBulkUpdate."""
+    if not batch:
+        return
+    mutation = """
+    mutation BulkUpdate($variants: [ProductVariantBulkInput!]!) {
+      productVariantsBulkUpdate(variants: $variants) {
+        userErrors { field message }
+      }
+    }
+    """
+    resp = graphql_post(mutation, {"variants": batch})
+    data = resp.json()
+    errors = data.get("errors")
+    if errors:
+        print("❌ GraphQL error", errors)
+    user_errors = data["data"]["productVariantsBulkUpdate"]["userErrors"]
+    for e in user_errors:
+        print(f"❌ {e['field']}: {e['message']}")
+
+
 # ---------- main ----------
 def main():
     if not SHOP_DOMAIN or not API_TOKEN:
@@ -98,6 +121,7 @@ def main():
 
     surcharges = load_surcharges()
     updated = 0
+    batch = []
 
     for prod in paginate_products():
         tags = {t.strip().lower() for t in prod["tags"].split(",")}
@@ -134,10 +158,16 @@ def main():
                 print(f"   └─ {chain:<10} already {new_price}")
                 continue
 
-            put(f"variants/{v['id']}.json", {"variant": {"id": v["id"], "price": new_price}})
+            batch.append({"id": f"gid://shopify/ProductVariant/{v['id']}", "price": str(new_price)})
             print(f"   └─ {chain:<10} → {new_price}")
+            if len(batch) == 50:
+                send_batch(batch)
+                batch = []
 
         updated += 1
+
+    if batch:
+        send_batch(batch)
 
     print(f"\nDone. Updated {updated} product(s).")
 
