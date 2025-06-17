@@ -49,6 +49,7 @@ def home():
 def percentage_updater():
     return render_template('percentage.html')
 
+
 @main_bp.route('/variant-updater', methods=['GET', 'POST'])
 @login_required
 def variant_updater():
@@ -108,3 +109,5 @@ def stream_variant():
 def stream_reset():
     cmd = ['python3', SCRIPTS['reset']]
     return Response(stream_job(cmd), mimetype='text/event-stream')
+
+
