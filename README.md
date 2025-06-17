@@ -34,6 +34,8 @@ required.
 
 - **Percentage Updater** adjusts prices by a percentage and uses `scripts/update_prices_shopify.py`. Enter the desired percentage and monitor the real-time log while the script runs. The script now retries automatically if the Shopify API responds with HTTP `429 Too Many Requests`.
 - **Variant Updater** runs `tempo solution/update_prices.py`. The page shows all surcharges from `tempo solution/variant_prices.json`. Edit the values for each chain and click **Save Changes** to update the file. Then use the **Run Update** button to apply the prices while the real-time log streams.
+ 
+Both updaters also keep each product's `custom.base_price` metafield in sync with the product price, ensuring future runs use the latest baseline.
 
 The output from each script is streamed live to your browser so you can follow progress.
 
