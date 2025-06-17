@@ -44,16 +44,19 @@ def main():
     variants = json.load(open(backup_file, "r", encoding="utf-8"))
 
     mutation = """
-    mutation BulkUpdate($variants: [ProductVariantBulkInput!]!) {
-      productVariantsBulkUpdate(variants: $variants) {
+    mutation BulkUpdate($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+      productVariantsBulkUpdate(productId: $productId, variants: $variants) {
         userErrors { field message }
       }
     }
     """
+    batches = {}
 
-    batch = []
-    def send_batch(items):
-        resp = graphql_post(session, mutation, {"variants": items})
+    def send_batch(pid, items):
+        resp = graphql_post(session, mutation, {
+            "productId": f"gid://shopify/Product/{pid}",
+            "variants": items
+        })
         if resp.ok:
             errors = resp.json()["data"]["productVariantsBulkUpdate"]["userErrors"]
             for e in errors:
@@ -64,16 +67,19 @@ def main():
             print(f"❌  bulk update failed: {resp.text}")
 
     for v in variants:
-        batch.append({
+        pid = v["product_id"]
+        batches.setdefault(pid, [])
+        batches[pid].append({
             "id": f"gid://shopify/ProductVariant/{v['variant_id']}",
             "price": v["original_price"],
         })
-        if len(batch) == 50:
-            send_batch(batch)
-            batch = []
+        if len(batches[pid]) == 50:
+            send_batch(pid, batches[pid])
+            batches[pid] = []
 
-    if batch:
-        send_batch(batch)
+    for pid, batch in batches.items():
+        if batch:
+            send_batch(pid, batch)
 
     print("✅  All prices reset.")
 

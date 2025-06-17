@@ -121,18 +121,21 @@ def set_base_price(product_id: int, price: float) -> None:
         print(f"❌ base_price {product_id}: {resp.text}")
 
 
-def send_batch(batch):
+def send_batch(product_id, batch):
     """Send a batch of variant price updates using productVariantsBulkUpdate."""
     if not batch:
         return
     mutation = """
-    mutation BulkUpdate($variants: [ProductVariantBulkInput!]!) {
-      productVariantsBulkUpdate(variants: $variants) {
+    mutation BulkUpdate($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+      productVariantsBulkUpdate(productId: $productId, variants: $variants) {
         userErrors { field message }
       }
     }
     """
-    resp = graphql_post(mutation, {"variants": batch})
+    resp = graphql_post(mutation, {
+        "productId": f"gid://shopify/Product/{product_id}",
+        "variants": batch
+    })
     data = resp.json()
     errors = data.get("errors")
     if errors:
@@ -149,9 +152,9 @@ def main():
 
     surcharges = load_surcharges()
     updated = 0
-    batch = []
 
     for prod in paginate_products():
+        batch = []
         tags = {t.strip().lower() for t in prod["tags"].split(",")}
         if "chaine_update" not in tags:
             continue
@@ -192,13 +195,13 @@ def main():
             batch.append({"id": f"gid://shopify/ProductVariant/{v['id']}", "price": str(new_price)})
             print(f"   └─ {chain:<10} → {new_price}")
             if len(batch) == 50:
-                send_batch(batch)
+                send_batch(prod["id"], batch)
                 batch = []
 
         updated += 1
 
-    if batch:
-        send_batch(batch)
+        if batch:
+            send_batch(prod["id"], batch)
 
     print(f"\nDone. Updated {updated} product(s).")
 
