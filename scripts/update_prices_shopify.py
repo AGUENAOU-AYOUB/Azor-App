@@ -159,38 +159,22 @@ def main():
             "price": tidy,
         })
 
-        if len(updates_by_product[pid]) == 50:
+    for pid, updates in updates_by_product.items():
+        for i in range(0, len(updates), 50):
+            batch = updates[i:i+50]
             resp = graphql_post(session, mutation, {
                 "productId": f"gid://shopify/Product/{pid}",
-                "variants": updates_by_product[pid]
+                "variants": batch
             })
             if resp.ok:
                 errors = resp.json()["data"]["productVariantsBulkUpdate"]["userErrors"]
                 if errors:
                     for e in errors:
                         print(f"❌ {e['field']}: {e['message']}")
-                for u in updates_by_product[pid]:
+                for u in batch:
                     print(f"✅  {u['id'].split('/')[-1]} → {u['price']}")
             else:
                 print(f"❌  bulk update failed: {resp.text}")
-            updates_by_product[pid] = []
-
-    for pid, updates in updates_by_product.items():
-        if not updates:
-            continue
-        resp = graphql_post(session, mutation, {
-            "productId": f"gid://shopify/Product/{pid}",
-            "variants": updates
-        })
-        if resp.ok:
-            errors = resp.json()["data"]["productVariantsBulkUpdate"]["userErrors"]
-            if errors:
-                for e in errors:
-                    print(f"❌ {e['field']}: {e['message']}")
-            for u in updates:
-                print(f"✅  {u['id'].split('/')[-1]} → {u['price']}")
-        else:
-            print(f"❌  bulk update failed: {resp.text}")
 
     for pid, price in new_base.items():
         set_base_price(session, pid, price)
