@@ -33,7 +33,21 @@ required.
 ## Using the Updaters
 
 - **Percentage Updater** adjusts prices by a percentage and uses `scripts/update_prices_shopify.py`. Enter the desired percentage and monitor the real-time log while the script runs. The script now retries automatically if the Shopify API responds with HTTP `429 Too Many Requests`.
-- **Variant Updater** runs `tempo solution/update_prices.py`. The page shows all surcharges from `tempo solution/variant_prices.json`. Edit the values for each chain and click **Save Changes** to update the file. Then use the **Run Update** button to apply the prices while the real-time log streams.
+- **Variant Updater** runs `tempo solution/update_prices.py`. The page shows all surcharges from `tempo solution/variant_prices.json`. Edit the values for each chain and click **Save Changes** to update the file. Then use the **Run Update** button to apply the prices while the real-time log streams. Both updaters now rely on Shopify's GraphQL bulk API behind the scenes for faster processing.
+- **Bulk Updater** loads a JSON file with variant IDs and target prices and submits a single GraphQL bulk mutation. Create `scripts/bulk_payload.json` in the following format and start the job from the **Bulk** page in the web interface or run the script directly:
+
+  ```json
+  [
+    {"id": 1234567890, "price": "9.99"},
+    {"id": 9876543210, "price": "19.90"}
+  ]
+  ```
+
+  Execute it manually with:
+
+  ```bash
+  python scripts/bulk_update_prices.py scripts/bulk_payload.json
+  ```
 
 The output from each script is streamed live to your browser so you can follow progress.
 

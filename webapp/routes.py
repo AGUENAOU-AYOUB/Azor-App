@@ -26,7 +26,8 @@ def toggle_language():
 SCRIPTS = {
     'percentage': os.path.join('scripts', 'update_prices_shopify.py'),
     'variant': os.path.join('tempo solution', 'update_prices.py'),
-    'reset': os.path.join('scripts', 'reset_prices_shopify.py')
+    'reset': os.path.join('scripts', 'reset_prices_shopify.py'),
+    'bulk': os.path.join('scripts', 'bulk_update_prices.py')
 }
 
 
@@ -48,6 +49,13 @@ def home():
 @login_required
 def percentage_updater():
     return render_template('percentage.html')
+
+
+@main_bp.route('/bulk-updater')
+@login_required
+def bulk_updater():
+    return render_template('bulk.html')
+
 
 @main_bp.route('/variant-updater', methods=['GET', 'POST'])
 @login_required
@@ -73,6 +81,20 @@ def variant_updater():
         flash(translate('surcharges_saved'), 'success')
 
     return render_template('variant.html', surcharges=surcharges)
+
+
+@main_bp.route('/bulk-upload', methods=['POST'])
+@login_required
+def bulk_upload():
+    data = request.get_data(as_text=True)
+    try:
+        json.loads(data)
+    except json.JSONDecodeError:
+        return 'Invalid JSON', 400
+    path = os.path.join('scripts', 'bulk_payload.json')
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(data)
+    return '', 204
 
 
 
@@ -108,3 +130,13 @@ def stream_variant():
 def stream_reset():
     cmd = ['python3', SCRIPTS['reset']]
     return Response(stream_job(cmd), mimetype='text/event-stream')
+
+
+@main_bp.route('/stream/bulk')
+@login_required
+def stream_bulk():
+    path = os.path.join('scripts', 'bulk_payload.json')
+    cmd = ['python3', SCRIPTS['bulk'], path]
+    return Response(stream_job(cmd), mimetype='text/event-stream')
+
+

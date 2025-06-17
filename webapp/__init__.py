@@ -27,6 +27,12 @@ TRANSLATIONS = {
         'en': 'Update variant surcharges individually.',
         'fr': 'Mettre à jour chaque supplément de variante individuellement.'
     },
+    'bulk': {'en': 'Bulk', 'fr': 'Lot'},
+    'bulk_card_title': {'en': 'Bulk Price Updater', 'fr': 'Mise à jour en masse'},
+    'bulk_card_desc': {
+        'en': 'Run a JSON-based bulk price update.',
+        'fr': 'Exécuter une mise à jour de prix à partir d\'un fichier JSON.'
+    },
     'percentage_title': {'en': 'Percentage Price Update', 'fr': 'Mise à jour des prix par pourcentage'},
     'enter_percentage': {'en': 'Enter percentage', 'fr': 'Entrez le pourcentage'},
     'run': {'en': 'Run', 'fr': 'Exécuter'},
@@ -36,6 +42,9 @@ TRANSLATIONS = {
     'variant_title': {'en': 'Variant Price Update', 'fr': 'Mise à jour des prix des variantes'},
     'save_changes': {'en': 'Save Changes', 'fr': 'Enregistrer'},
     'run_update': {'en': 'Run Update', 'fr': 'Exécuter la mise à jour'},
+    'bulk_title': {'en': 'Bulk Price Update', 'fr': 'Mise à jour des prix en masse'},
+    'upload_json': {'en': 'Updates JSON', 'fr': 'Fichier JSON'},
+    'run_bulk': {'en': 'Run Bulk Update', 'fr': 'Exécuter la mise à jour en masse'},
     'price_reset_title': {'en': 'Price Reset', 'fr': 'Réinitialisation des prix'},
     'price_reset_intro': {
         'en': 'This will restore all prices from the last backup file.',
