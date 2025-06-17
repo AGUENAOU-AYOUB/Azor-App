@@ -44,7 +44,9 @@ variant price from Shopify and stores them in a file named
 `shopify_backup.json` under `scripts/`. This allows
 `reset_prices_shopify.py` to restore the original prices later.  The backup can
 grow to around **500&nbsp;KB** depending on the number of variants, so it is now
-ignored by Git and will be recreated whenever needed.
+ignored by Git and will be recreated whenever needed. The reset script now uses
+Shopify's `productVariantsBulkUpdate` mutation to push prices back in batches of
+50 variants for faster recovery.
 
 ## Deploying in Production
 
