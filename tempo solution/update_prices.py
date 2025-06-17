@@ -148,9 +148,11 @@ def main():
     surcharges = load_surcharges()
     updated = 0
 
+    current_pid = None
+    batch = []
+
 
     for prod in paginate_products():
-        batch = []
         tags = {t.strip().lower() for t in prod["tags"].split(",")}
         if "chaine_update" not in tags:
             continue
@@ -197,7 +199,8 @@ def main():
             batch.append({"id": f"gid://shopify/ProductVariant/{v['id']}", "price": str(new_price)})
             print(f"   └─ {chain:<10} → {new_price}")
             if len(batch) == 50:
-                send_batch(prod["id"], batch)
+
+                send_batch(current_pid, batch)
 
                 batch = []
 
@@ -205,7 +208,13 @@ def main():
 
         if batch:
 
-            send_batch(prod["id"], batch)
+            send_batch(current_pid, batch)
+            batch = []
+
+    # flush any remaining variants if the loop exited without sending
+    if batch:
+        send_batch(current_pid, batch)
+        batch = []
 
 
     print(f"\nDone. Updated {updated} product(s).")
