@@ -25,10 +25,12 @@ def shopify_get(session, url, **kwargs):
         return resp
 
 
-def shopify_put(session, url, **kwargs):
-    """PUT request with basic retry handling for rate limits."""
+def graphql_post(session, query, variables=None):
+    """POST to the GraphQL endpoint with retry on 429."""
+    url = f"https://{DOMAIN}/admin/api/{API_VERSION}/graphql.json"
+    payload = {"query": query, "variables": variables or {}}
     while True:
-        resp = session.put(url, **kwargs)
+        resp = session.post(url, json=payload)
         if resp.status_code == 429:
             time.sleep(2)
             continue
@@ -91,18 +93,49 @@ def main():
             variants = json.load(bf)
 
     # 5) Apply percentage + tidy rounding
+    updates = []
+    mutation = """
+    mutation BulkUpdate($variants: [ProductVariantBulkInput!]!) {
+      productVariantsBulkUpdate(variants: $variants) {
+        userErrors { field message }
+      }
+    }
+    """
+
     for v in variants:
         base = float(v["original_price"])
         newp = base * (1 + args.percent/100.0)
         tidy = round_to_tidy(newp)
 
-        url = f"{base_url}/variants/{v['variant_id']}.json"
-        payload = {"variant": {"id": v["variant_id"], "price": tidy}}
-        resp = shopify_put(session, url, json=payload)
+        updates.append({
+            "id": f"gid://shopify/ProductVariant/{v['variant_id']}",
+            "price": tidy,
+        })
+
+        if len(updates) == 50:
+            resp = graphql_post(session, mutation, {"variants": updates})
+            if resp.ok:
+                errors = resp.json()["data"]["productVariantsBulkUpdate"]["userErrors"]
+                if errors:
+                    for e in errors:
+                        print(f"❌ {e['field']}: {e['message']}")
+                for u in updates:
+                    print(f"✅  {u['id'].split('/')[-1]} → {u['price']}")
+            else:
+                print(f"❌  bulk update failed: {resp.text}")
+            updates = []
+
+    if updates:
+        resp = graphql_post(session, mutation, {"variants": updates})
         if resp.ok:
-            print(f"✅  {v['variant_id']} → {tidy}")
+            errors = resp.json()["data"]["productVariantsBulkUpdate"]["userErrors"]
+            if errors:
+                for e in errors:
+                    print(f"❌ {e['field']}: {e['message']}")
+            for u in updates:
+                print(f"✅  {u['id'].split('/')[-1]} → {u['price']}")
         else:
-            print(f"❌  {v['variant_id']} failed: {resp.text}")
+            print(f"❌  bulk update failed: {resp.text}")
 
     print("🎉 Finished updating!")
 
