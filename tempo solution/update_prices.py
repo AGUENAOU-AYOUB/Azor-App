@@ -3,9 +3,9 @@
 update_prices.py  –  one-shot Shopify variant price updater
 ────────────────────────────────────────────────────────────
  • Picks every product tagged CHAINE_UPDATE  +  bracelet/collier
- • Reads base price from metafield   custom.base_price
- • Adds surcharge from variant_prices.json
- • BUT:  "Forsat S" surcharge is forced to 0.0  → price = base_price
+ • "Forsat S" variant establishes the shared base price
+ • Base price is stored in metafield   custom.base_price
+ • Adds surcharge from variant_prices.json for all other variants
  • No rounding is applied – prices match the exact surcharge values
 """
 
@@ -168,23 +168,26 @@ def main():
             batch = []
         current_pid = pid
 
-        # ensure base_price exists and matches Forsat S price
+        # Base price comes from the "Forsat S" variant when available
         forsat_variant = next(
-            (v for v in prod["variants"]
-             if "Forsat S" in (v.get("option1"), v.get("option2"), v.get("option3"))),
+            (
+                v
+                for v in prod["variants"]
+                if "Forsat S" in (v.get("option1"), v.get("option2"), v.get("option3"))
+            ),
             None,
         )
 
-        bp = base_price(pid)
-        if bp is None:
-            if forsat_variant:
-                bp = float(forsat_variant["price"])
-            else:
-                bp = float(prod["variants"][0]["price"])
-            set_base_price(pid, bp)
-        elif forsat_variant and float(forsat_variant["price"]) != bp:
+        stored_bp = base_price(pid)
+        if forsat_variant:
             bp = float(forsat_variant["price"])
-            set_base_price(pid, bp)
+            if stored_bp != bp:
+                set_base_price(pid, bp)
+        else:
+            bp = stored_bp
+            if bp is None:
+                bp = float(prod["variants"][0]["price"])
+                set_base_price(pid, bp)
 
         print(f"\n→  {prod['title']}  [{cat}]  base={bp}")
         for v in prod["variants"]:
