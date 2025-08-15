@@ -44,17 +44,6 @@ def round_to_tidy(price: float) -> str:
     tidy = min(opts, key=lambda x: abs(price_int - x))
     return f"{tidy:.2f}"
 
-def fetch_base_price(session, base_url, product_id):
-    resp = shopify_get(session, f"{base_url}/products/{product_id}/metafields.json")
-    resp.raise_for_status()
-    for mf in resp.json().get("metafields", []):
-        if mf.get("namespace") == "custom" and mf.get("key") == "base_price":
-            try:
-                return float(mf["value"])
-            except (KeyError, TypeError, ValueError):
-                return None
-    return None
-
 
 def set_base_price(session, product_id, price):
     mutation = """
@@ -130,13 +119,7 @@ def main():
         with open(backup_file, "r", encoding="utf-8") as bf:
             variants = json.load(bf)
 
-    product_ids = {v["product_id"] for v in variants}
     factor = 1 + args.percent / 100.0
-    new_base = {}
-    for pid in product_ids:
-        bp = fetch_base_price(session, base_url, pid)
-        if bp is not None:
-            new_base[pid] = round_to_tidy(bp * factor)
 
     # 5) Apply percentage + tidy rounding
     mutation = """
@@ -147,6 +130,7 @@ def main():
     }
     """
     updates_by_product = {}
+    base_price_values = {}
     for v in variants:
         base = float(v["original_price"])
         newp = base * (1 + args.percent/100.0)
@@ -158,6 +142,8 @@ def main():
             "id": f"gid://shopify/ProductVariant/{v['variant_id']}",
             "price": tidy,
         })
+        if pid not in base_price_values:
+            base_price_values[pid] = tidy
 
     for pid, updates in updates_by_product.items():
         for i in range(0, len(updates), 50):
@@ -179,7 +165,7 @@ def main():
             else:
                 print(f"❌  bulk update failed: {resp.text}")
 
-    for pid, price in new_base.items():
+    for pid, price in base_price_values.items():
         set_base_price(session, pid, price)
 
     print("🎉 Finished updating!")

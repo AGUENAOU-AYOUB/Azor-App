@@ -168,10 +168,23 @@ def main():
             batch = []
         current_pid = pid
 
+        # ensure base_price exists and matches Forsat S price
+        forsat_variant = next(
+            (v for v in prod["variants"]
+             if "Forsat S" in (v.get("option1"), v.get("option2"), v.get("option3"))),
+            None,
+        )
+
         bp = base_price(pid)
         if bp is None:
-            print(f"• Skip {prod['title']} (missing base_price)")
-            continue
+            if forsat_variant:
+                bp = float(forsat_variant["price"])
+            else:
+                bp = float(prod["variants"][0]["price"])
+            set_base_price(pid, bp)
+        elif forsat_variant and float(forsat_variant["price"]) != bp:
+            bp = float(forsat_variant["price"])
+            set_base_price(pid, bp)
 
         print(f"\n→  {prod['title']}  [{cat}]  base={bp}")
         for v in prod["variants"]:
@@ -185,12 +198,11 @@ def main():
                 print(f"   └─ {v['title']:<25} not in surcharge list, skipped")
                 continue
 
-            # Forsat S rule
-            surcharge = 0.0 if chain == "Forsat S" else surcharges[cat][chain]
-            new_price = bp + surcharge
-            if chain == "Forsat S" and new_price != bp:
-                set_base_price(prod["id"], new_price)
-                bp = new_price
+            if chain == "Forsat S":
+                new_price = bp
+            else:
+                surcharge = surcharges[cat][chain]
+                new_price = bp + surcharge
 
             if float(v["price"]) == new_price:
                 print(f"   └─ {chain:<10} already {new_price}")
