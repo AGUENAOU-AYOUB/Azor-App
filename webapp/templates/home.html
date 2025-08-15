@@ -21,5 +21,14 @@
       </div>
     </a>
   </div>
+  <div class="col-md-6 col-lg-4">
+    <a href="{{ url_for('main.base_price_init') }}" class="text-decoration-none text-reset">
+      <div class="card service-card h-100 text-center p-4">
+        <i class="fa-solid fa-coins fa-2x mb-3"></i>
+        <h5 class="card-title">{{ t('baseprice_card_title') }}</h5>
+        <p class="card-text small">{{ t('baseprice_card_desc') }}</p>
+      </div>
+    </a>
+  </div>
 </div>
 {% endblock %}

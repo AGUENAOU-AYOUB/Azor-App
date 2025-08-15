@@ -26,7 +26,8 @@ def toggle_language():
 SCRIPTS = {
     'percentage': os.path.join('scripts', 'update_prices_shopify.py'),
     'variant': os.path.join('tempo solution', 'update_prices.py'),
-    'reset': os.path.join('scripts', 'reset_prices_shopify.py')
+    'reset': os.path.join('scripts', 'reset_prices_shopify.py'),
+    'baseprice': os.path.join('scripts', 'init_base_price.py'),
 }
 
 
@@ -48,6 +49,11 @@ def home():
 @login_required
 def percentage_updater():
     return render_template('percentage.html')
+
+@main_bp.route('/base-price-init')
+@login_required
+def base_price_init():
+    return render_template('baseprice.html')
 
 @main_bp.route('/variant-updater', methods=['GET', 'POST'])
 @login_required
@@ -107,4 +113,11 @@ def stream_variant():
 @login_required
 def stream_reset():
     cmd = ['python3', SCRIPTS['reset']]
+    return Response(stream_job(cmd), mimetype='text/event-stream')
+
+
+@main_bp.route('/stream/baseprice')
+@login_required
+def stream_baseprice():
+    cmd = ['python3', SCRIPTS['baseprice']]
     return Response(stream_job(cmd), mimetype='text/event-stream')

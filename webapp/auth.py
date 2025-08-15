@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
 import os
-from . import translate
+from . import translate, csrf
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -8,6 +8,7 @@ ADMIN_USER = os.getenv('ADMIN_USERNAME', 'admin')
 ADMIN_PASS = os.getenv('ADMIN_PASSWORD', 'password')
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
+@csrf.exempt
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
