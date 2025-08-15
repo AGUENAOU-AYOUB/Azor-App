@@ -27,7 +27,9 @@ SCRIPTS = {
     'percentage': os.path.join('scripts', 'update_prices_shopify.py'),
     'variant': os.path.join('tempo solution', 'update_prices.py'),
     'reset': os.path.join('scripts', 'reset_prices_shopify.py'),
+
     'baseprice': os.path.join('scripts', 'init_base_price.py'),
+
 }
 
 
@@ -81,6 +83,10 @@ def variant_updater():
     return render_template('variant.html', surcharges=surcharges)
 
 
+@main_bp.route('/base-price-init')
+@login_required
+def base_price_init():
+    return render_template('base_price.html')
 
 
 def stream_job(cmd):
@@ -106,6 +112,13 @@ def stream_percentage():
 @login_required
 def stream_variant():
     cmd = ['python3', SCRIPTS['variant']]
+    return Response(stream_job(cmd), mimetype='text/event-stream')
+
+
+@main_bp.route('/stream/base-price-init')
+@login_required
+def stream_base_price_init():
+    cmd = ['python3', SCRIPTS['baseprice']]
     return Response(stream_job(cmd), mimetype='text/event-stream')
 
 

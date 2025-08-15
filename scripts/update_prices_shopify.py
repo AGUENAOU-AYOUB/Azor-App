@@ -45,10 +45,12 @@ def round_to_tidy(price: float) -> str:
     return f"{tidy:.2f}"
 
 
+
 def set_base_price(session, product_id, price):
     mutation = """
     mutation SetBase($mf: [MetafieldsSetInput!]!) {
       metafieldsSet(metafields: $mf) {
+        metafields { id }
         userErrors { field message }
       }
     }
@@ -66,10 +68,16 @@ def set_base_price(session, product_id, price):
     }
     resp = graphql_post(session, mutation, variables)
     if resp.ok:
-        for e in resp.json()["data"]["metafieldsSet"]["userErrors"]:
-            print(f"❌ base_price {product_id}: {e['message']}")
+        data = resp.json()["data"]["metafieldsSet"]
+        errors = data["userErrors"]
+        if errors:
+            for e in errors:
+                print(f"❌ base_price {product_id}: {e['message']}")
+            return False
+        return True
     else:
         print(f"❌ base_price {product_id}: {resp.text}")
+        return False
 
 def fetch_all_variants(session, base_url):
     variants, page_info = [], None
@@ -166,7 +174,9 @@ def main():
                 print(f"❌  bulk update failed: {resp.text}")
 
     for pid, price in base_price_values.items():
+
         set_base_price(session, pid, price)
+
 
     print("🎉 Finished updating!")
 

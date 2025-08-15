@@ -27,6 +27,7 @@ TRANSLATIONS = {
         'en': 'Update variant surcharges individually.',
         'fr': 'Mettre à jour chaque supplément de variante individuellement.'
     },
+
     'baseprice_card_title': {
         'en': 'Base Price Initialization',
         'fr': 'Initialisation du prix de base'
@@ -34,6 +35,7 @@ TRANSLATIONS = {
     'baseprice_card_desc': {
         'en': 'Create base_price metafield for all products.',
         'fr': 'Créer le champ base_price pour tous les produits.'
+
     },
     'percentage_title': {'en': 'Percentage Price Update', 'fr': 'Mise à jour des prix par pourcentage'},
     'enter_percentage': {'en': 'Enter percentage', 'fr': 'Entrez le pourcentage'},
@@ -44,6 +46,7 @@ TRANSLATIONS = {
     'variant_title': {'en': 'Variant Price Update', 'fr': 'Mise à jour des prix des variantes'},
     'save_changes': {'en': 'Save Changes', 'fr': 'Enregistrer'},
     'run_update': {'en': 'Run Update', 'fr': 'Exécuter la mise à jour'},
+    'base_price_title': {'en': 'Base Price Initialization', 'fr': 'Initialisation du prix de base'},
     'price_reset_title': {'en': 'Price Reset', 'fr': 'Réinitialisation des prix'},
     'price_reset_intro': {
         'en': 'This will restore all prices from the last backup file.',

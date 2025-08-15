@@ -3,9 +3,9 @@
 update_prices.py  –  one-shot Shopify variant price updater
 ────────────────────────────────────────────────────────────
  • Picks every product tagged CHAINE_UPDATE  +  bracelet/collier
- • Reads base price from metafield   custom.base_price
- • Adds surcharge from variant_prices.json
- • BUT:  "Forsat S" surcharge is forced to 0.0  → price = base_price
+ • "Forsat S" variant establishes the shared base price
+ • Base price is stored in metafield   custom.base_price
+ • Adds surcharge from variant_prices.json for all other variants
  • No rounding is applied – prices match the exact surcharge values
 """
 
@@ -185,6 +185,7 @@ def main():
         elif forsat_variant and float(forsat_variant["price"]) != bp:
             bp = float(forsat_variant["price"])
             set_base_price(pid, bp)
+
 
         print(f"\n→  {prod['title']}  [{cat}]  base={bp}")
         for v in prod["variants"]:
