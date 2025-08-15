@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 import os
-import requests
+
 import time
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
-
-TOKEN = os.getenv("API_TOKEN")
-DOMAIN = os.getenv("SHOP_DOMAIN")
+TOKEN       = os.getenv("API_TOKEN")
+DOMAIN      = os.getenv("SHOP_DOMAIN")
 API_VERSION = os.getenv("API_VERSION", "2024-04")
 
 
 def shopify_get(session, url, **kwargs):
-    """GET request with retry handling for Shopify rate limits."""
+
     while True:
         resp = session.get(url, **kwargs)
         if resp.status_code == 429:
@@ -22,7 +22,7 @@ def shopify_get(session, url, **kwargs):
 
 
 def graphql_post(session, query, variables=None):
-    """POST to Shopify GraphQL API with retry on 429."""
+
     url = f"https://{DOMAIN}/admin/api/{API_VERSION}/graphql.json"
     payload = {"query": query, "variables": variables or {}}
     while True:
@@ -54,33 +54,15 @@ def set_base_price(session, product_id, price):
     }
     resp = graphql_post(session, mutation, variables)
     if resp.ok:
-        errors = resp.json()["data"]["metafieldsSet"]["userErrors"]
-        if errors:
-            for e in errors:
-                print(f"❌ base_price {product_id}: {e['message']}")
+
+        errs = resp.json()["data"]["metafieldsSet"]["userErrors"]
+        if errs:
+            for e in errs:
+                print(f"❌ {product_id}: {e['message']}")
         else:
             print(f"✅ {product_id} → {price}")
     else:
-        print(f"❌ base_price {product_id}: {resp.text}")
-
-
-def fetch_products(session):
-    base_url = f"https://{DOMAIN}/admin/api/{API_VERSION}"
-    products = []
-    page_info = None
-    while True:
-        params = {"limit": 250, "fields": "id,variants"}
-        if page_info:
-            params["page_info"] = page_info
-        resp = shopify_get(session, f"{base_url}/products.json", params=params)
-        resp.raise_for_status()
-        data = resp.json()
-        products.extend(data["products"])
-        link = resp.headers.get("Link", "")
-        if 'rel="next"' not in link:
-            break
-        page_info = link.split("page_info=")[1].split(">")[0]
-    return products
+        print(f"❌ {product_id}: {resp.text}")
 
 
 def main():
@@ -89,16 +71,27 @@ def main():
         "X-Shopify-Access-Token": TOKEN,
         "Content-Type": "application/json",
     })
-    print("🔄 Fetching products...")
-    products = fetch_products(session)
-    print(f"Found {len(products)} products")
-    for prod in products:
-        variants = prod.get("variants", [])
-        if not variants:
-            print(f"⚠️ No variants for product {prod['id']}")
-            continue
-        price = variants[0]["price"]
-        set_base_price(session, prod["id"], price)
+
+    base_url = f"https://{DOMAIN}/admin/api/{API_VERSION}"
+    page_info = None
+    while True:
+        params = {"limit": 250}
+
+        if page_info:
+            params["page_info"] = page_info
+        resp = shopify_get(session, f"{base_url}/products.json", params=params)
+        resp.raise_for_status()
+        data = resp.json()
+
+        for prod in data.get("products", []):
+            price = prod["variants"][0]["price"]
+            set_base_price(session, prod["id"], price)
+
+        link = resp.headers.get("Link", "")
+        if 'rel="next"' not in link:
+            break
+        page_info = link.split("page_info=")[1].split(">")[0]
+
     print("🎉 Finished initializing base prices!")
 
 

@@ -45,24 +45,6 @@ def round_to_tidy(price: float) -> str:
     return f"{tidy:.2f}"
 
 
-def get_base_price(session, product_id):
-    query = """
-    query GetBasePrice($id: ID!) {
-      product(id: $id) {
-        metafield(namespace: \"custom\", key: \"base_price\") {
-          value
-        }
-      }
-    }
-    """
-    resp = graphql_post(session, query, {"id": f"gid://shopify/Product/{product_id}"})
-    if resp.ok:
-        mf = resp.json()["data"]["product"]["metafield"]
-        return mf["value"] if mf else None
-    else:
-        print(f"❌ base_price fetch {product_id}: {resp.text}")
-        return None
-
 
 def set_base_price(session, product_id, price):
     mutation = """
@@ -192,18 +174,9 @@ def main():
                 print(f"❌  bulk update failed: {resp.text}")
 
     for pid, price in base_price_values.items():
-        existing = get_base_price(session, pid)
-        if set_base_price(session, pid, price):
-            new_val = get_base_price(session, pid)
-            if new_val is not None:
-                if existing is None:
-                    print(f"🆕 base_price {pid} → {new_val}")
-                else:
-                    print(f"✅ base_price {pid} → {new_val}")
-            else:
-                print(f"❌ base_price {pid} not found after update")
-        else:
-            print(f"❌ base_price {pid} update failed")
+
+        set_base_price(session, pid, price)
+
 
     print("🎉 Finished updating!")
 

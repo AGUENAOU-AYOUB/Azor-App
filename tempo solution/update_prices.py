@@ -168,26 +168,24 @@ def main():
             batch = []
         current_pid = pid
 
-        # Base price comes from the "Forsat S" variant when available
+        # ensure base_price exists and matches Forsat S price
         forsat_variant = next(
-            (
-                v
-                for v in prod["variants"]
-                if "Forsat S" in (v.get("option1"), v.get("option2"), v.get("option3"))
-            ),
+            (v for v in prod["variants"]
+             if "Forsat S" in (v.get("option1"), v.get("option2"), v.get("option3"))),
             None,
         )
 
-        stored_bp = base_price(pid)
-        if forsat_variant:
-            bp = float(forsat_variant["price"])
-            if stored_bp != bp:
-                set_base_price(pid, bp)
-        else:
-            bp = stored_bp
-            if bp is None:
+        bp = base_price(pid)
+        if bp is None:
+            if forsat_variant:
+                bp = float(forsat_variant["price"])
+            else:
                 bp = float(prod["variants"][0]["price"])
-                set_base_price(pid, bp)
+            set_base_price(pid, bp)
+        elif forsat_variant and float(forsat_variant["price"]) != bp:
+            bp = float(forsat_variant["price"])
+            set_base_price(pid, bp)
+
 
         print(f"\n→  {prod['title']}  [{cat}]  base={bp}")
         for v in prod["variants"]:

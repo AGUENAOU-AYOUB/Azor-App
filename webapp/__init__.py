@@ -27,10 +27,15 @@ TRANSLATIONS = {
         'en': 'Update variant surcharges individually.',
         'fr': 'Mettre à jour chaque supplément de variante individuellement.'
     },
-    'base_price_card_title': {'en': 'Base Price Initialization', 'fr': 'Initialisation du prix de base'},
-    'base_price_card_desc': {
-        'en': "Set each product's base price to its current price.",
-        'fr': 'Définir le prix de base de chaque produit à son prix actuel.'
+
+    'baseprice_card_title': {
+        'en': 'Base Price Initialization',
+        'fr': 'Initialisation du prix de base'
+    },
+    'baseprice_card_desc': {
+        'en': 'Create base_price metafield for all products.',
+        'fr': 'Créer le champ base_price pour tous les produits.'
+
     },
     'percentage_title': {'en': 'Percentage Price Update', 'fr': 'Mise à jour des prix par pourcentage'},
     'enter_percentage': {'en': 'Enter percentage', 'fr': 'Entrez le pourcentage'},
@@ -54,6 +59,22 @@ TRANSLATIONS = {
         'en': 'Invalid value for {chain}',
         'fr': 'Valeur invalide pour {chain}'
     },
+    'baseprice_title': {
+        'en': 'Base Price Initialization',
+        'fr': 'Initialisation du prix de base'
+    },
+    'baseprice_intro': {
+        'en': 'Set each product\'s base_price metafield to its current price.',
+        'fr': 'Définir le champ base_price de chaque produit sur son prix actuel.'
+    },
+    'run_baseprice': {
+        'en': 'Run Initialization',
+        'fr': "Exécuter l'initialisation"
+    },
+    'baseprice_completed': {
+        'en': 'Initialization completed!',
+        'fr': 'Initialisation terminée !'
+    },
 }
 
 
@@ -69,6 +90,7 @@ def translate(key, lang=None, **kwargs):
 def create_app():
     app = Flask(__name__)
     app.secret_key = os.getenv('SECRET_KEY', 'change-me')
+    app.config['WTF_CSRF_ENABLED'] = os.getenv('WTF_CSRF_ENABLED', 'true').lower() == 'true'
     csrf.init_app(app)
 
     from .auth import auth_bp
