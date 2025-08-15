@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 import os
+import sys
 
 import time
 import requests
 from dotenv import load_dotenv
 
 load_dotenv()
+sys.stdout.reconfigure(encoding="utf-8")
 TOKEN       = os.getenv("API_TOKEN")
 DOMAIN      = os.getenv("SHOP_DOMAIN")
 API_VERSION = os.getenv("API_VERSION", "2024-04")
