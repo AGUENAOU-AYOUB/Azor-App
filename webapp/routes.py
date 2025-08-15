@@ -10,6 +10,7 @@ from flask import (
 )
 import os
 import json
+import sys
 
 from .jobqueue import enqueue, stream
 from . import translate
@@ -99,25 +100,25 @@ def stream_percentage():
     percent = request.args.get('percent')
     if not percent:
         return 'Missing percent', 400
-    cmd = ['python3', SCRIPTS['percentage'], '--percent', percent]
+    cmd = [sys.executable, SCRIPTS['percentage'], '--percent', percent]
     return Response(stream_job(cmd), mimetype='text/event-stream')
 
 @main_bp.route('/stream/variant')
 @login_required
 def stream_variant():
-    cmd = ['python3', SCRIPTS['variant']]
+    cmd = [sys.executable, SCRIPTS['variant']]
     return Response(stream_job(cmd), mimetype='text/event-stream')
 
 
 @main_bp.route('/stream/reset')
 @login_required
 def stream_reset():
-    cmd = ['python3', SCRIPTS['reset']]
+    cmd = [sys.executable, SCRIPTS['reset']]
     return Response(stream_job(cmd), mimetype='text/event-stream')
 
 
 @main_bp.route('/stream/baseprice')
 @login_required
 def stream_baseprice():
-    cmd = ['python3', SCRIPTS['baseprice']]
+    cmd = [sys.executable, SCRIPTS['baseprice']]
     return Response(stream_job(cmd), mimetype='text/event-stream')
