@@ -129,8 +129,10 @@ def main():
     base_url = f"https://{DOMAIN}/admin/api/{API_VERSION}"
     page_info = None
     chunk = []
+
     futures = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+
         while True:
             params = {"limit": 250}
 
@@ -143,8 +145,10 @@ def main():
             for prod in data.get("products", []):
                 price = prod["variants"][0]["price"]
                 chunk.append((prod["id"], price))
+
                 if len(chunk) == BATCH_SIZE:
                     futures.append(executor.submit(process_chunk, chunk))
+
                     chunk = []
 
             link = resp.headers.get("Link", "")
@@ -153,10 +157,12 @@ def main():
             page_info = link.split("page_info=")[1].split(">")[0]
 
         if chunk:
+
             futures.append(executor.submit(process_chunk, chunk))
 
         for f in concurrent.futures.as_completed(futures):
             f.result()
+
 
     print("[DONE] Finished initializing base prices!")
 
