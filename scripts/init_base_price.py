@@ -22,6 +22,10 @@ def shopify_get(session, url, **kwargs):
             print(f"[ERROR] {url}: request timed out")
             time.sleep(2)
             continue
+        except requests.exceptions.ConnectionError:
+            print(f"[ERROR] {url}: connection failed")
+            time.sleep(2)
+            continue
         if resp.status_code == 429:
             time.sleep(2)
             continue
@@ -45,6 +49,18 @@ def graphql_post(session, query, variables=None):
                 print(f"[ERROR] {prod_id}: request timed out")
             else:
                 print("[ERROR] request timed out")
+            time.sleep(2)
+            continue
+        except requests.exceptions.ConnectionError:
+            prod_id = None
+            try:
+                prod_id = variables["mf"][0]["ownerId"].split("/")[-1]
+            except Exception:
+                pass
+            if prod_id:
+                print(f"[ERROR] {prod_id}: request failed")
+            else:
+                print("[ERROR] request failed")
             time.sleep(2)
             continue
         if resp.status_code == 429:
