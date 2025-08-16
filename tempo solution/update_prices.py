@@ -235,10 +235,10 @@ def main():
 
 if __name__ == "__main__":
     print(textwrap.dedent(f"""
-        ─────────────────────────────────────────────
-        Shopify Variant Price Updater  –  Forsat S = base_price
+        ---------------------------------------------
+        Shopify Variant Price Updater  -  Forsat S = base_price
         Store : {SHOP_DOMAIN}
         API   : {API_VERSION}
-        ─────────────────────────────────────────────
+        ---------------------------------------------
     """))
     main()
