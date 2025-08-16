@@ -60,11 +60,11 @@ def set_base_price(session, product_id, price):
         errs = resp.json()["data"]["metafieldsSet"]["userErrors"]
         if errs:
             for e in errs:
-                print(f"❌ {product_id}: {e['message']}")
+                print(f"[ERROR] {product_id}: {e['message']}")
         else:
-            print(f"✅ {product_id} → {price}")
+            print(f"[OK] {product_id} -> {price}")
     else:
-        print(f"❌ {product_id}: {resp.text}")
+        print(f"[ERROR] {product_id}: {resp.text}")
 
 
 def main():
@@ -94,7 +94,7 @@ def main():
             break
         page_info = link.split("page_info=")[1].split(">")[0]
 
-    print("🎉 Finished initializing base prices!")
+    print("[DONE] Finished initializing base prices!")
 
 
 if __name__ == "__main__":
