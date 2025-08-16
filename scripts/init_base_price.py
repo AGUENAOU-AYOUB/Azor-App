@@ -69,7 +69,7 @@ def graphql_post(session, query, variables=None):
         return resp
 
 
-def set_base_price(session, product_id, price):
+def set_base_prices(session, products):
     mutation = """
     mutation SetBase($mf: [MetafieldsSetInput!]!) {
       metafieldsSet(metafields: $mf) {
@@ -80,25 +80,32 @@ def set_base_price(session, product_id, price):
     variables = {
         "mf": [
             {
-                "ownerId": f"gid://shopify/Product/{product_id}",
+                "ownerId": f"gid://shopify/Product/{pid}",
                 "namespace": "custom",
                 "key": "base_price",
                 "type": "number_decimal",
                 "value": str(price),
             }
+            for pid, price in products
         ]
     }
     resp = graphql_post(session, mutation, variables)
     if resp.ok:
-
         errs = resp.json()["data"]["metafieldsSet"]["userErrors"]
         if errs:
             for e in errs:
-                print(f"[ERROR] {product_id}: {e['message']}")
+                idx = None
+                try:
+                    idx = int(e.get("field", [])[1])
+                except Exception:
+                    pass
+                prod_id = products[idx][0] if idx is not None and 0 <= idx < len(products) else "?"
+                print(f"[ERROR] {prod_id}: {e['message']}")
         else:
-            print(f"[OK] {product_id} -> {price}")
+            for pid, price in products:
+                print(f"[OK] {pid} -> {price}")
     else:
-        print(f"[ERROR] {product_id}: {resp.text}")
+        print(f"[ERROR] {resp.text}")
 
 
 def main():
@@ -110,6 +117,7 @@ def main():
 
     base_url = f"https://{DOMAIN}/admin/api/{API_VERSION}"
     page_info = None
+    chunk = []
     while True:
         params = {"limit": 250}
 
@@ -121,12 +129,18 @@ def main():
 
         for prod in data.get("products", []):
             price = prod["variants"][0]["price"]
-            set_base_price(session, prod["id"], price)
+            chunk.append((prod["id"], price))
+            if len(chunk) == 25:
+                set_base_prices(session, chunk)
+                chunk = []
 
         link = resp.headers.get("Link", "")
         if 'rel="next"' not in link:
             break
         page_info = link.split("page_info=")[1].split(">")[0]
+
+    if chunk:
+        set_base_prices(session, chunk)
 
     print("[DONE] Finished initializing base prices!")
 
