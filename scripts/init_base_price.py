@@ -3,6 +3,7 @@ import os
 import sys
 
 import time
+import concurrent.futures
 import requests
 from dotenv import load_dotenv
 
@@ -115,32 +116,40 @@ def main():
         "Content-Type": "application/json",
     })
 
+    headers = session.headers.copy()
+
+    def process_chunk(products):
+        local_session = requests.Session()
+        local_session.headers.update(headers)
+        set_base_prices(local_session, products)
+
     base_url = f"https://{DOMAIN}/admin/api/{API_VERSION}"
     page_info = None
     chunk = []
-    while True:
-        params = {"limit": 250}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        while True:
+            params = {"limit": 250}
 
-        if page_info:
-            params["page_info"] = page_info
-        resp = shopify_get(session, f"{base_url}/products.json", params=params)
-        resp.raise_for_status()
-        data = resp.json()
+            if page_info:
+                params["page_info"] = page_info
+            resp = shopify_get(session, f"{base_url}/products.json", params=params)
+            resp.raise_for_status()
+            data = resp.json()
 
-        for prod in data.get("products", []):
-            price = prod["variants"][0]["price"]
-            chunk.append((prod["id"], price))
-            if len(chunk) == 25:
-                set_base_prices(session, chunk)
-                chunk = []
+            for prod in data.get("products", []):
+                price = prod["variants"][0]["price"]
+                chunk.append((prod["id"], price))
+                if len(chunk) == 25:
+                    executor.submit(process_chunk, chunk)
+                    chunk = []
 
-        link = resp.headers.get("Link", "")
-        if 'rel="next"' not in link:
-            break
-        page_info = link.split("page_info=")[1].split(">")[0]
+            link = resp.headers.get("Link", "")
+            if 'rel="next"' not in link:
+                break
+            page_info = link.split("page_info=")[1].split(">")[0]
 
-    if chunk:
-        set_base_prices(session, chunk)
+        if chunk:
+            executor.submit(process_chunk, chunk)
 
     print("[DONE] Finished initializing base prices!")
 
