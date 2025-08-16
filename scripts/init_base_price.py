@@ -16,7 +16,12 @@ API_VERSION = os.getenv("API_VERSION", "2024-04")
 def shopify_get(session, url, **kwargs):
 
     while True:
-        resp = session.get(url, **kwargs)
+        try:
+            resp = session.get(url, timeout=30, **kwargs)
+        except requests.exceptions.ReadTimeout:
+            print(f"[ERROR] {url}: request timed out")
+            time.sleep(2)
+            continue
         if resp.status_code == 429:
             time.sleep(2)
             continue
@@ -28,7 +33,20 @@ def graphql_post(session, query, variables=None):
     url = f"https://{DOMAIN}/admin/api/{API_VERSION}/graphql.json"
     payload = {"query": query, "variables": variables or {}}
     while True:
-        resp = session.post(url, json=payload)
+        try:
+            resp = session.post(url, json=payload, timeout=30)
+        except requests.exceptions.ReadTimeout:
+            prod_id = None
+            try:
+                prod_id = variables["mf"][0]["ownerId"].split("/")[-1]
+            except Exception:
+                pass
+            if prod_id:
+                print(f"[ERROR] {prod_id}: request timed out")
+            else:
+                print("[ERROR] request timed out")
+            time.sleep(2)
+            continue
         if resp.status_code == 429:
             time.sleep(2)
             continue
