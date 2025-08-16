@@ -111,9 +111,9 @@ def set_base_price(product_id: int, price: float) -> None:
     resp = graphql_post(mutation, variables)
     if resp.ok:
         for err in resp.json()["data"]["metafieldsSet"]["userErrors"]:
-            print(f"❌ base_price {product_id}: {err['message']}")
+            print(f"ERROR base_price {product_id}: {err['message']}")
     else:
-        print(f"❌ base_price {product_id}: {resp.text}")
+        print(f"ERROR base_price {product_id}: {resp.text}")
 
 
 def send_batch(product_id, batch):
@@ -134,16 +134,16 @@ def send_batch(product_id, batch):
     data = resp.json()
     errors = data.get("errors")
     if errors:
-        print("❌ GraphQL error", errors)
+        print("ERROR GraphQL error", errors)
     user_errors = data["data"]["productVariantsBulkUpdate"]["userErrors"]
     for e in user_errors:
-        print(f"❌ {e['field']}: {e['message']}")
+        print(f"ERROR {e['field']}: {e['message']}")
 
 
 # ---------- main ----------
 def main():
     if not SHOP_DOMAIN or not API_TOKEN:
-        sys.exit("❌  SHOP_DOMAIN / API_TOKEN missing in .env")
+        sys.exit("ERROR  SHOP_DOMAIN / API_TOKEN missing in .env")
 
     surcharges = load_surcharges()
     updated = 0
@@ -159,7 +159,7 @@ def main():
 
         cat = "bracelets" if "bracelet" in tags else ("colliers" if "collier" in tags else None)
         if not cat:
-            print(f"• Skip {prod['title']} (no bracelet/collier tag)")
+            print(f"* Skip {prod['title']} (no bracelet/collier tag)")
             continue
 
         pid = prod["id"]
@@ -187,7 +187,7 @@ def main():
             set_base_price(pid, bp)
 
 
-        print(f"\n→  {prod['title']}  [{cat}]  base={bp}")
+        print(f"\n->  {prod['title']}  [{cat}]  base={bp}")
         for v in prod["variants"]:
             # grab chain name from option1/2/3
             chain = next(
@@ -196,7 +196,7 @@ def main():
                 None
             )
             if chain is None:
-                print(f"   └─ {v['title']:<25} not in surcharge list, skipped")
+                print(f"   - {v['title']:<25} not in surcharge list, skipped")
                 continue
 
             if chain == "Forsat S":
@@ -206,11 +206,11 @@ def main():
                 new_price = bp + surcharge
 
             if float(v["price"]) == new_price:
-                print(f"   └─ {chain:<10} already {new_price}")
+                print(f"   - {chain:<10} already {new_price}")
                 continue
 
             batch.append({"id": f"gid://shopify/ProductVariant/{v['id']}", "price": str(new_price)})
-            print(f"   └─ {chain:<10} → {new_price}")
+            print(f"   - {chain:<10} -> {new_price}")
             if len(batch) == 50:
 
                 send_batch(current_pid, batch)
@@ -235,10 +235,10 @@ def main():
 
 if __name__ == "__main__":
     print(textwrap.dedent(f"""
-        ─────────────────────────────────────────────
-        Shopify Variant Price Updater  –  Forsat S = base_price
+        ---------------------------------------------
+        Shopify Variant Price Updater  -  Forsat S = base_price
         Store : {SHOP_DOMAIN}
         API   : {API_VERSION}
-        ─────────────────────────────────────────────
+        ---------------------------------------------
     """))
     main()
