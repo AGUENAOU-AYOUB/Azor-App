@@ -12,6 +12,9 @@ sys.stdout.reconfigure(encoding="utf-8")
 TOKEN       = os.getenv("API_TOKEN")
 DOMAIN      = os.getenv("SHOP_DOMAIN")
 API_VERSION = os.getenv("API_VERSION", "2024-04")
+# Tune concurrency via environment vars if needed
+MAX_WORKERS = int(os.getenv("BASEPRICE_WORKERS", "8"))
+BATCH_SIZE  = int(os.getenv("BASEPRICE_BATCH", "100"))
 
 
 def shopify_get(session, url, **kwargs):
@@ -126,7 +129,10 @@ def main():
     base_url = f"https://{DOMAIN}/admin/api/{API_VERSION}"
     page_info = None
     chunk = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+
+    futures = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+
         while True:
             params = {"limit": 250}
 
@@ -139,8 +145,10 @@ def main():
             for prod in data.get("products", []):
                 price = prod["variants"][0]["price"]
                 chunk.append((prod["id"], price))
-                if len(chunk) == 25:
-                    executor.submit(process_chunk, chunk)
+
+                if len(chunk) == BATCH_SIZE:
+                    futures.append(executor.submit(process_chunk, chunk))
+
                     chunk = []
 
             link = resp.headers.get("Link", "")
@@ -149,7 +157,12 @@ def main():
             page_info = link.split("page_info=")[1].split(">")[0]
 
         if chunk:
-            executor.submit(process_chunk, chunk)
+
+            futures.append(executor.submit(process_chunk, chunk))
+
+        for f in concurrent.futures.as_completed(futures):
+            f.result()
+
 
     print("[DONE] Finished initializing base prices!")
 
