@@ -3,6 +3,7 @@ import os
 import sys
 
 import time
+import concurrent.futures
 import requests
 from dotenv import load_dotenv
 
@@ -11,6 +12,9 @@ sys.stdout.reconfigure(encoding="utf-8")
 TOKEN       = os.getenv("API_TOKEN")
 DOMAIN      = os.getenv("SHOP_DOMAIN")
 API_VERSION = os.getenv("API_VERSION", "2024-04")
+# Tune concurrency via environment vars if needed
+MAX_WORKERS = int(os.getenv("BASEPRICE_WORKERS", "8"))
+BATCH_SIZE  = int(os.getenv("BASEPRICE_BATCH", "100"))
 
 
 def shopify_get(session, url, **kwargs):
@@ -115,32 +119,44 @@ def main():
         "Content-Type": "application/json",
     })
 
+    headers = session.headers.copy()
+
+    def process_chunk(products):
+        local_session = requests.Session()
+        local_session.headers.update(headers)
+        set_base_prices(local_session, products)
+
     base_url = f"https://{DOMAIN}/admin/api/{API_VERSION}"
     page_info = None
     chunk = []
-    while True:
-        params = {"limit": 250}
+    futures = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        while True:
+            params = {"limit": 250}
 
-        if page_info:
-            params["page_info"] = page_info
-        resp = shopify_get(session, f"{base_url}/products.json", params=params)
-        resp.raise_for_status()
-        data = resp.json()
+            if page_info:
+                params["page_info"] = page_info
+            resp = shopify_get(session, f"{base_url}/products.json", params=params)
+            resp.raise_for_status()
+            data = resp.json()
 
-        for prod in data.get("products", []):
-            price = prod["variants"][0]["price"]
-            chunk.append((prod["id"], price))
-            if len(chunk) == 25:
-                set_base_prices(session, chunk)
-                chunk = []
+            for prod in data.get("products", []):
+                price = prod["variants"][0]["price"]
+                chunk.append((prod["id"], price))
+                if len(chunk) == BATCH_SIZE:
+                    futures.append(executor.submit(process_chunk, chunk))
+                    chunk = []
 
-        link = resp.headers.get("Link", "")
-        if 'rel="next"' not in link:
-            break
-        page_info = link.split("page_info=")[1].split(">")[0]
+            link = resp.headers.get("Link", "")
+            if 'rel="next"' not in link:
+                break
+            page_info = link.split("page_info=")[1].split(">")[0]
 
-    if chunk:
-        set_base_prices(session, chunk)
+        if chunk:
+            futures.append(executor.submit(process_chunk, chunk))
+
+        for f in concurrent.futures.as_completed(futures):
+            f.result()
 
     print("[DONE] Finished initializing base prices!")
 
