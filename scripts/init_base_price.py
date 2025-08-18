@@ -4,6 +4,7 @@ import sys
 
 import time
 import concurrent.futures
+import threading
 import requests
 from urllib.parse import urlparse, parse_qs
 from dotenv import load_dotenv
@@ -71,7 +72,7 @@ def graphql_post(session, query, variables=None):
         return resp
 
 
-def set_base_prices(session, products, progress_cb):
+def set_base_prices(session, products):
     mutation = """
     mutation SetBase($mf: [MetafieldsSetInput!]!) {
       metafieldsSet(metafields: $mf) {
@@ -105,7 +106,6 @@ def set_base_prices(session, products, progress_cb):
                 print(f"[ERROR] {prod_id}: {e['message']}")
         else:
             first, last = products[0][0], products[-1][0]
-            progress_cb(len(products))
             print(f"[OK] {first}..{last}")
     else:
         print(f"[ERROR] {resp.text}")
@@ -121,11 +121,14 @@ def main():
     headers = session.headers.copy()
 
     processed = 0
+    total_products = 0
+    lock = threading.Lock()
 
     def progress_cb(count):
         nonlocal processed
-        processed += count
-        print(f"[PROGRESS] processed {processed}")
+        with lock:
+            processed += count
+            print(f"[PROGRESS] processed {processed}")
 
     def process_chunk(products):
         """Process a list of ``(product_id, price)`` tuples.
@@ -136,7 +139,10 @@ def main():
         """
         local_session = requests.Session()
         local_session.headers.update(headers)
-        set_base_prices(local_session, products, progress_cb)
+        try:
+            set_base_prices(local_session, products)
+        finally:
+            progress_cb(len(products))
 
     base_url = f"https://{DOMAIN}/admin/api/{API_VERSION}"
     page_info = None
@@ -163,6 +169,7 @@ def main():
             for prod in data.get("products", []):
                 price = prod["variants"][0]["price"]
                 chunk.append((prod["id"], price))
+                total_products += 1
                 if len(chunk) == CHUNK_SIZE:
                     executor.submit(process_chunk, chunk)
                     chunk = []
@@ -185,7 +192,10 @@ def main():
         if chunk:
             executor.submit(process_chunk, chunk)
 
-    print("[DONE] Finished initializing base prices!")
+    if processed != total_products:
+        print(f"[DONE] Finished initializing base prices! Processed {processed} of {total_products} products (mismatch)")
+    else:
+        print(f"[DONE] Finished initializing base prices! Processed {processed} of {total_products} products")
 
 
 if __name__ == "__main__":

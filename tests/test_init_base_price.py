@@ -40,9 +40,8 @@ def test_processed_matches_unique_products(init_module, monkeypatch, capsys):
 
     processed_ids = []
 
-    def fake_set_base_prices(session, products, progress_cb):
+    def fake_set_base_prices(session, products):
         processed_ids.extend(pid for pid, _ in products)
-        progress_cb(len(products))
 
     monkeypatch.setattr(init_module, 'shopify_get', fake_shopify_get)
     monkeypatch.setattr(init_module, 'set_base_prices', fake_set_base_prices)
@@ -50,7 +49,7 @@ def test_processed_matches_unique_products(init_module, monkeypatch, capsys):
     init_module.main()
 
     captured = capsys.readouterr()
-    assert '[DONE] Finished initializing base prices!' in captured.out
+    assert '[DONE] Finished initializing base prices! Processed 3 of 3 products' in captured.out
     assert '[PROGRESS] processed 3' in captured.out
     assert processed_ids == [1, 2, 3]
     assert len(set(processed_ids)) == 3
