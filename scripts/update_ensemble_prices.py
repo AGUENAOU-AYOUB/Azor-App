@@ -81,9 +81,17 @@ def main():
     while True:
         resp = graphql_post(session, query, {"cursor": cursor})
         resp.raise_for_status()
-        data = resp.json()["data"]["products"]
 
-        for edge in data["edges"]:
+
+        payload = resp.json()
+        if "errors" in payload:
+            raise RuntimeError(f"GraphQL errors: {payload['errors']}")
+        products = payload.get("data", {}).get("products")
+        if not products:
+            raise RuntimeError(f"No product data returned: {payload}")
+
+        for edge in products["edges"]:
+
             product = edge["node"]
             pid = product["id"]
             base_price = float(product["variants"]["nodes"][0]["price"])
@@ -120,10 +128,10 @@ def main():
 
             total += len(updates)
 
-        if not data["pageInfo"]["hasNextPage"]:
-            break
-        cursor = data["pageInfo"]["endCursor"]
 
+        if not products["pageInfo"]["hasNextPage"]:
+            break
+        cursor = products["pageInfo"]["endCursor"]
 
     print(f"[DONE] Updated {total} variants")
 
