@@ -31,6 +31,8 @@ SCRIPTS = {
 
     'baseprice': os.path.join('scripts', 'init_base_price.py'),
 
+    'ensemble': os.path.join('scripts', 'update_ensemble_prices.py'),
+
 }
 
 
@@ -59,34 +61,10 @@ def base_price_init():
     return render_template('baseprice.html')
 
 
-@main_bp.route('/ensemble', methods=['GET', 'POST'])
+@main_bp.route('/ensemble')
 @login_required
 def ensemble_pricing():
-    file_path = os.path.join('tempo solution', 'variant_prices.json')
-    with open(file_path, encoding='utf-8') as f:
-        surcharges = json.load(f)
-
-    price = None
-    collier = bracelet = ''
-    base_price = ''
-    if request.method == 'POST':
-        base_price = request.form.get('base_price', '').strip()
-        collier = request.form.get('collier')
-        bracelet = request.form.get('bracelet')
-        try:
-            price = float(base_price)
-            price += surcharges['colliers'].get(collier, 0)
-            price += surcharges['bracelets'].get(bracelet, 0)
-        except ValueError:
-            flash(translate('invalid_value', chain='price'), 'error')
-    return render_template(
-        'ensemble.html',
-        surcharges=surcharges,
-        price=price,
-        collier=collier,
-        bracelet=bracelet,
-        base_price=base_price,
-    )
+    return render_template('ensemble.html')
 
 @main_bp.route('/variant-updater', methods=['GET', 'POST'])
 @login_required
@@ -151,4 +129,11 @@ def stream_reset():
 @login_required
 def stream_baseprice():
     cmd = [sys.executable, SCRIPTS['baseprice']]
+    return Response(stream_job(cmd), mimetype='text/event-stream')
+
+
+@main_bp.route('/stream/ensemble')
+@login_required
+def stream_ensemble():
+    cmd = [sys.executable, SCRIPTS['ensemble']]
     return Response(stream_job(cmd), mimetype='text/event-stream')
