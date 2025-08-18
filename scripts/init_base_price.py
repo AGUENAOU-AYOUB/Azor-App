@@ -5,6 +5,7 @@ import sys
 import time
 import concurrent.futures
 import requests
+from urllib.parse import urlparse, parse_qs
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -167,9 +168,19 @@ def main():
                     chunk = []
 
             link = resp.headers.get("Link", "")
-            if 'rel="next"' not in link:
+            if link:
+                links = requests.utils.parse_header_links(
+                    link.rstrip('>').replace('>,<', ',<')
+                )
+                next_link = next((l for l in links if l.get('rel') == 'next'), None)
+                if not next_link:
+                    break
+                next_url = next_link.get('url', '')
+                page_info = parse_qs(urlparse(next_url).query).get('page_info', [None])[0]
+                if not page_info:
+                    break
+            else:
                 break
-            page_info = link.split("page_info=")[1].split(">")[0]
 
         if chunk:
             executor.submit(process_chunk, chunk)
