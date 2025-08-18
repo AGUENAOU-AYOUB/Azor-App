@@ -13,6 +13,7 @@ DOMAIN = os.getenv("SHOP_DOMAIN")
 API_VERSION = os.getenv("API_VERSION", "2024-04")
 
 
+
 def graphql_post(session, query, variables=None):
     """POST to Shopify GraphQL with retry on rate limits."""
     url = f"https://{DOMAIN}/admin/api/{API_VERSION}/graphql.json"
@@ -36,6 +37,7 @@ def round_to_tidy(price: float) -> str:
 
 def main():
     session = requests.Session()
+
     session.headers.update(
         {
             "X-Shopify-Access-Token": TOKEN,
@@ -80,6 +82,7 @@ def main():
         resp = graphql_post(session, query, {"cursor": cursor})
         resp.raise_for_status()
 
+
         payload = resp.json()
         if "errors" in payload:
             raise RuntimeError(f"GraphQL errors: {payload['errors']}")
@@ -88,6 +91,7 @@ def main():
             raise RuntimeError(f"No product data returned: {payload}")
 
         for edge in products["edges"]:
+
             product = edge["node"]
             pid = product["id"]
             base_price = float(product["variants"]["nodes"][0]["price"])
@@ -100,6 +104,7 @@ def main():
                 price += surcharges["colliers"].get(collier, 0)
                 price += surcharges["bracelets"].get(bracelet, 0)
                 tidy = round_to_tidy(price)
+
                 updates.append({"id": v["id"], "price": tidy})
 
             for i in range(0, len(updates), 50):
@@ -122,6 +127,7 @@ def main():
                     print(f"[ERROR] bulk update failed: {resp_u.text}")
 
             total += len(updates)
+
 
         if not products["pageInfo"]["hasNextPage"]:
             break
