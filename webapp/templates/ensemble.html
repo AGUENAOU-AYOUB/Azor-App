@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3 class="mb-4">{{ t('ensemble_title') }}</h3>
+<form method="post" class="mb-3">
+  <div class="mb-3">
+    <label class="form-label">{{ t('base_price_label') }}</label>
+    <input type="number" step="0.01" class="form-control" name="base_price" value="{{ base_price }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">{{ t('collier_label') }}</label>
+    <select class="form-select" name="collier">
+      {% for name, price in surcharges['colliers'].items() %}
+      <option value="{{ name }}" {% if name==collier %}selected{% endif %}>{{ name }} ({{ price }})</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">{{ t('bracelet_label') }}</label>
+    <select class="form-select" name="bracelet">
+      {% for name, price in surcharges['bracelets'].items() %}
+      <option value="{{ name }}" {% if name==bracelet %}selected{% endif %}>{{ name }} ({{ price }})</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button class="btn btn-primary" type="submit">{{ t('calculate') }}</button>
+</form>
+{% if price is not none %}
+<div class="alert alert-info">{{ t('total_price') }}: {{ price }}</div>
+{% endif %}
+{% endblock %}

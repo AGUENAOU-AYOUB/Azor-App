@@ -75,6 +75,18 @@ TRANSLATIONS = {
         'en': 'Initialization completed!',
         'fr': 'Initialisation terminée !'
     },
+    'ensemble': {'en': 'Ensemble', 'fr': 'Ensemble'},
+    'ensemble_card_title': {'en': 'Ensemble Products', 'fr': 'Produits Ensemble'},
+    'ensemble_card_desc': {
+        'en': 'Combine collier and bracelet prices.',
+        'fr': 'Combiner les prix collier et bracelet.'
+    },
+    'ensemble_title': {'en': 'Ensemble Price Calculator', 'fr': "Calculateur de prix ensemble"},
+    'base_price_label': {'en': 'Base Product Price', 'fr': 'Prix de base'},
+    'collier_label': {'en': 'Collier Variant', 'fr': 'Variante collier'},
+    'bracelet_label': {'en': 'Bracelet Variant', 'fr': 'Variante bracelet'},
+    'calculate': {'en': 'Calculate', 'fr': 'Calculer'},
+    'total_price': {'en': 'Total Price', 'fr': 'Prix total'},
 }
 
 

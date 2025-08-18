@@ -58,6 +58,36 @@ def percentage_updater():
 def base_price_init():
     return render_template('baseprice.html')
 
+
+@main_bp.route('/ensemble', methods=['GET', 'POST'])
+@login_required
+def ensemble_pricing():
+    file_path = os.path.join('tempo solution', 'variant_prices.json')
+    with open(file_path, encoding='utf-8') as f:
+        surcharges = json.load(f)
+
+    price = None
+    collier = bracelet = ''
+    base_price = ''
+    if request.method == 'POST':
+        base_price = request.form.get('base_price', '').strip()
+        collier = request.form.get('collier')
+        bracelet = request.form.get('bracelet')
+        try:
+            price = float(base_price)
+            price += surcharges['colliers'].get(collier, 0)
+            price += surcharges['bracelets'].get(bracelet, 0)
+        except ValueError:
+            flash(translate('invalid_value', chain='price'), 'error')
+    return render_template(
+        'ensemble.html',
+        surcharges=surcharges,
+        price=price,
+        collier=collier,
+        bracelet=bracelet,
+        base_price=base_price,
+    )
+
 @main_bp.route('/variant-updater', methods=['GET', 'POST'])
 @login_required
 def variant_updater():

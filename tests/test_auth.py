@@ -7,6 +7,7 @@ def app():
     os.environ['SECRET_KEY'] = 'test-key'
     os.environ['ADMIN_USERNAME'] = 'admin'
     os.environ['ADMIN_PASSWORD'] = 'password'
+    os.environ['WTF_CSRF_ENABLED'] = 'false'
     app = create_app()
     app.config['TESTING'] = True
     return app
