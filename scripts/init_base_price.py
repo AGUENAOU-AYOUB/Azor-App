@@ -70,7 +70,7 @@ def graphql_post(session, query, variables=None):
         return resp
 
 
-def set_base_prices(session, products):
+def set_base_prices(session, products, progress_cb):
     mutation = """
     mutation SetBase($mf: [MetafieldsSetInput!]!) {
       metafieldsSet(metafields: $mf) {
@@ -103,8 +103,9 @@ def set_base_prices(session, products):
                 prod_id = products[idx][0] if idx is not None and 0 <= idx < len(products) else "?"
                 print(f"[ERROR] {prod_id}: {e['message']}")
         else:
-            for pid, price in products:
-                print(f"[OK] {pid} -> {price}")
+            first, last = products[0][0], products[-1][0]
+            progress_cb(len(products))
+            print(f"[OK] {first}..{last}")
     else:
         print(f"[ERROR] {resp.text}")
 
@@ -118,15 +119,22 @@ def main():
 
     headers = session.headers.copy()
 
+    processed = 0
+
+    def progress_cb(count):
+        nonlocal processed
+        processed += count
+        print(f"[PROGRESS] processed {processed}")
+
     def process_chunk(products):
         local_session = requests.Session()
         local_session.headers.update(headers)
-        set_base_prices(local_session, products)
+        set_base_prices(local_session, products, progress_cb)
 
     base_url = f"https://{DOMAIN}/admin/api/{API_VERSION}"
     page_info = None
     chunk = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         while True:
             params = {"limit": 250}
 
@@ -139,7 +147,7 @@ def main():
             for prod in data.get("products", []):
                 price = prod["variants"][0]["price"]
                 chunk.append((prod["id"], price))
-                if len(chunk) == 25:
+                if len(chunk) == 50:
                     executor.submit(process_chunk, chunk)
                     chunk = []
 
