@@ -73,3 +73,11 @@ def test_stream_baseprice_uses_sys_executable(client, monkeypatch):
     resp = client.get('/stream/baseprice')
     assert resp.status_code == 200
     assert captured['cmd'] == [sys.executable, routes_mod.SCRIPTS['baseprice']]
+
+
+def test_stream_ensemble_uses_sys_executable(client, monkeypatch):
+    captured = setup_patches(monkeypatch)
+    login(client)
+    resp = client.get('/stream/ensemble')
+    assert resp.status_code == 200
+    assert captured['cmd'] == [sys.executable, routes_mod.SCRIPTS['ensemble']]

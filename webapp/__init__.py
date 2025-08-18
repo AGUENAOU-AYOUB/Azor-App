@@ -75,6 +75,18 @@ TRANSLATIONS = {
         'en': 'Initialization completed!',
         'fr': 'Initialisation terminée !'
     },
+    'ensemble_intro': {
+        'en': 'Compute ensemble variant prices and push updates to Shopify.',
+        'fr': 'Calculer les prix des variantes ensemble et envoyer les mises à jour à Shopify.'
+    },
+    'run_ensemble': {
+        'en': 'Run Ensemble Update',
+        'fr': 'Exécuter la mise à jour ensemble'
+    },
+    'ensemble_completed': {
+        'en': 'Ensemble update completed!',
+        'fr': 'Mise à jour des ensembles terminée !'
+    },
     'ensemble': {'en': 'Ensemble', 'fr': 'Ensemble'},
     'ensemble_card_title': {'en': 'Ensemble Products', 'fr': 'Produits Ensemble'},
     'ensemble_card_desc': {
