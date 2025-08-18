@@ -59,7 +59,12 @@ def main():
           node {
             id
             variants(first: 250) {
-              nodes { id price option1 option2 }
+              nodes {
+                id
+                price
+                selectedOptions { name value }
+              }
+
             }
           }
         }
@@ -98,8 +103,17 @@ def main():
 
             updates = []
             for v in product["variants"]["nodes"]:
-                collier = v.get("option1", "")
-                bracelet = v.get("option2", "")
+
+                collier = ""
+                bracelet = ""
+                for opt in v.get("selectedOptions", []):
+                    name = opt.get("name", "").lower()
+                    if name == "collier":
+                        collier = opt.get("value", "")
+                    elif name == "bracelet":
+                        bracelet = opt.get("value", "")
+
+
                 price = base_price
                 price += surcharges["colliers"].get(collier, 0)
                 price += surcharges["bracelets"].get(bracelet, 0)
