@@ -127,6 +127,12 @@ def main():
         print(f"[PROGRESS] processed {processed}")
 
     def process_chunk(products):
+        """Process a list of ``(product_id, price)`` tuples.
+
+        We create a short‑lived session per worker so that the connection pool
+        isn't shared across threads and to avoid hitting limits on some
+        hosting providers that restrict the number of concurrent connections.
+        """
         local_session = requests.Session()
         local_session.headers.update(headers)
         set_base_prices(local_session, products, progress_cb)
@@ -134,7 +140,16 @@ def main():
     base_url = f"https://{DOMAIN}/admin/api/{API_VERSION}"
     page_info = None
     chunk = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+    # ``metafieldsSet`` only accepts up to 25 metafields per call.  Using more
+    # would trigger errors such as "Exceeded the maximum number of metafields".
+    CHUNK_SIZE = 25
+
+    # Some execution environments (e.g. hosting providers) limit the number of
+    # concurrent worker threads.  Keep the pool small to remain within those
+    # limits and prevent "Exceeded the maximum worker limit" errors.
+    MAX_WORKERS = 4
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         while True:
             params = {"limit": 250}
 
@@ -147,7 +162,7 @@ def main():
             for prod in data.get("products", []):
                 price = prod["variants"][0]["price"]
                 chunk.append((prod["id"], price))
-                if len(chunk) == 50:
+                if len(chunk) == CHUNK_SIZE:
                     executor.submit(process_chunk, chunk)
                     chunk = []
 
