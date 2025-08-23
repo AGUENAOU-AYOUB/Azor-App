@@ -16,6 +16,7 @@ This repository contains tools to update Shopify variant prices and now includes
    ADMIN_USERNAME=youruser
    ADMIN_PASSWORD=yourpass
    SECRET_KEY=random-string
+   APP_BASE_URL=https://example.com
    ```
 3. Start the server (set `DEBUG=true` in your environment to enable Flask debug
    mode):
@@ -50,6 +51,27 @@ ignored by Git and will be recreated whenever needed. The update and reset
 scripts now use Shopify's `productVariantsBulkUpdate(productId: ID!, variants:
 [ProductVariantsBulkInput!]!)` mutation to push prices back in batches of up to
 50 variants per product for faster recovery.
+
+## Shopify Webhook Setup
+
+Register a webhook so Shopify notifies the app when a product's
+`custom.base_price` metafield changes.
+
+1. Expose your running app at a public URL and set `APP_BASE_URL` in your
+   environment to that root (for example `https://example.com`).
+2. Initialize the `base_price` metafield for all products if you haven't
+   already:
+   ```bash
+   python scripts/init_base_price.py
+   ```
+3. Register the webhook:
+   ```bash
+   python scripts/register_metafield_webhook.py
+   ```
+4. (Optional) Align all existing prices with their `base_price` metafield:
+   ```bash
+   python scripts/sync_prices_from_base.py
+   ```
 
 ## Deploying in Production
 
