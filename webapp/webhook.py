@@ -60,11 +60,16 @@ def _update_variant_prices(product_id: int, price: str) -> None:
                 for vid in chunk
             ],
         }
-        session.post(
+        resp = session.post(
             f"https://{domain}/admin/api/{API_VERSION}/graphql.json",
             json={"query": mutation, "variables": vars_payload},
             timeout=30,
         )
+        resp.raise_for_status()
+        data = resp.json().get("data", {})
+        errors = data.get("productVariantsBulkUpdate", {}).get("userErrors")
+        if errors:
+            raise Exception(f"Bulk update errors: {errors}")
 
 
 @webhook_bp.route("/webhook/metafield", methods=["POST"])
