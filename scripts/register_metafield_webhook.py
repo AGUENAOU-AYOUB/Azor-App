@@ -65,7 +65,20 @@ def main():
         print(f"[OK] Registered webhook (id={wid})")
     else:
         print(f"[ERROR] {resp.status_code} {resp.text}")
-        resp.raise_for_status()
+        try:
+            resp.raise_for_status()
+        except requests.HTTPError as exc:
+            errors = {}
+            try:
+                errors = resp.json().get("errors", {})
+            except ValueError:
+                pass
+            topic_error = errors.get("topic")
+            if topic_error:
+                print(
+                    f"[INFO] {topic_error} — ensure the app has required scopes (e.g., read/write_metafields)"
+                )
+            raise
 
 
 if __name__ == "__main__":
