@@ -3,8 +3,9 @@
 
 The script fetches all products through the GraphQL Admin API.  For each
 product it checks whether a ``base_price`` metaobject already exists for the
-product's ``ownerId``.  If not, the current price of the first variant is used
-to create a new metaobject with ``product`` and ``price`` fields.
+product using its product GID as the owner.  If not, the current price of the
+first variant is used to create a new metaobject with ``product`` and ``price``
+fields.
 """
 
 import os
@@ -114,8 +115,8 @@ def fetch_products(session: requests.Session) -> Iterator[Dict[str, object]]:
 
 
 METAOBJECT_QUERY = """
-query BasePriceMetaobject($ownerId: ID!, $type: String!) {
-  metaobjects(first: 1, ownerId: $ownerId, type: $type) {
+query BasePriceMetaobject($owner: ID!, $type: String!) {
+  metaobjects(first: 1, type: $type, owners: [{id: $owner}]) {
     edges {
       node {
         id
@@ -127,7 +128,7 @@ query BasePriceMetaobject($ownerId: ID!, $type: String!) {
 
 
 def metaobject_exists(session: requests.Session, product_id: str) -> Optional[bool]:
-    variables = {"ownerId": product_id, "type": "base_price"}
+    variables = {"owner": product_id, "type": "base_price"}
     resp = graphql_request(session, METAOBJECT_QUERY, variables)
     data = extract_graphql_data(resp, "metaobjects")
     if data is None:
