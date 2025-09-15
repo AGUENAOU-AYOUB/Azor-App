@@ -116,7 +116,9 @@ def fetch_products(session: requests.Session) -> Iterator[Dict[str, object]]:
 
 METAOBJECT_QUERY = """
 query BasePriceMetaobject($owner: ID!, $type: String!) {
+
   metaobjects(first: 1, type: $type, owners: [{id: $owner}]) {
+
     edges {
       node {
         id
