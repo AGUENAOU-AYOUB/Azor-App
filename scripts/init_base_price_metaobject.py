@@ -72,9 +72,7 @@ query Products($cursor: String) {
         variants(first: 1) {
           edges {
             node {
-              price {
-                amount
-              }
+              price
             }
           }
         }
