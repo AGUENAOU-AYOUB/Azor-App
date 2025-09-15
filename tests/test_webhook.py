@@ -58,6 +58,32 @@ def test_webhook_triggers_update(monkeypatch, client):
     assert called == {'pid': 42, 'price': '19.99'}
 
 
+def test_metaobject_webhook_triggers_update(monkeypatch, client):
+    called = {}
+
+    def fake_update(pid, price):
+        called['pid'] = pid
+        called['price'] = price
+
+    monkeypatch.setattr(webhook_mod, '_update_variant_prices', fake_update)
+
+    payload = {
+        'data': {
+            'product': {'id': 7},
+            'price': '29.99',
+        }
+    }
+    body = json.dumps(payload).encode()
+    hmac_header = _sign(body)
+    resp = client.post(
+        '/webhook/metaobject',
+        data=body,
+        headers={'Content-Type': 'application/json', 'X-Shopify-Hmac-SHA256': hmac_header},
+    )
+    assert resp.status_code == 200
+    assert called == {'pid': 7, 'price': '29.99'}
+
+
 def test_webhook_invalid_hmac(client):
     payload = {'namespace': 'custom', 'key': 'base_price', 'owner_id': 1, 'value': '9'}
     body = json.dumps(payload).encode()

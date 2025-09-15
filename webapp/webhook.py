@@ -87,3 +87,27 @@ def metafield_update():
             print(f"Webhook error: {exc}")
             return "", 500
     return "", 200
+
+
+@webhook_bp.route("/webhook/metaobject", methods=["POST"])
+@csrf.exempt
+def metaobject_update():
+    if not _verify_webhook(
+        request.data, request.headers.get("X-Shopify-Hmac-SHA256", "")
+    ):
+        return "Unauthorized", 401
+    payload = request.get_json() or {}
+    try:
+        prod_raw = payload["data"]["product"]["id"]
+        if isinstance(prod_raw, str) and "/" in prod_raw:
+            prod_raw = prod_raw.rsplit("/", 1)[-1]
+        product_id = int(prod_raw)
+        price = str(payload["data"]["price"])
+    except Exception:
+        return "", 200
+    try:
+        _update_variant_prices(product_id, price)
+    except Exception as exc:
+        print(f"Webhook error: {exc}")
+        return "", 500
+    return "", 200
