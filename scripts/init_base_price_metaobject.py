@@ -114,8 +114,8 @@ def fetch_products(session: requests.Session) -> Iterator[Dict[str, object]]:
 
 
 METAOBJECT_QUERY = """
-query BasePriceMetaobject($ownerId: ID!, $type: String!) {
-  metaobjects(first: 1, ownerId: $ownerId, type: $type) {
+query BasePriceMetaobject($owner: ID!, $type: String!) {
+  metaobjects(first: 1, type: $type, owners: [$owner]) {
     edges {
       node {
         id
@@ -127,7 +127,7 @@ query BasePriceMetaobject($ownerId: ID!, $type: String!) {
 
 
 def metaobject_exists(session: requests.Session, product_id: str) -> Optional[bool]:
-    variables = {"ownerId": product_id, "type": "base_price"}
+    variables = {"owner": product_id, "type": "base_price"}
     resp = graphql_request(session, METAOBJECT_QUERY, variables)
     data = extract_graphql_data(resp, "metaobjects")
     if data is None:
